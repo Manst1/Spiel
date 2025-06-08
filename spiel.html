@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Manollos Spiele</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
+</head>
+<body class="min-h-screen flex flex-col items-center" id="body">
+    <!-- Farbpicker zur Änderung der Hintergrundfarbe -->
+    <div class="fixed top-4 right-4 z-20">
+        <div class="relative" id="colorPickerContainer">
+            <button id="colorPickerButton" class="bg-white text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-lg flex items-center gap-2 hover:bg-gray-100 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4l2 2h6a2 2 0 012 2v10a4 4 0 01-4 4H7z"></path>
+                </svg>
+                Hintergrund anpassen
+            </button>
+            <div id="colorPickerDropdown" class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl p-4 hidden">
+                <label for="bgColorPicker" class="block text-gray-800 font-semibold mb-2">Hintergrundfarbe:</label>
+                <input type="color" id="bgColorPicker" value="#1e293b" class="w-full h-10 rounded border-none cursor-pointer mb-4" />
+                <label for="patternSelect" class="block text-gray-800 font-semibold mb-2">Muster:</label>
+                <select id="patternSelect" class="w-full p-2 rounded border border-gray-300">
+                    <option value="solid">Einfarbig</option>
+                    <option value="gradient">Verlauf</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 pt-8 pb-12 w-full max-w-7xl">
+        <h1 id="headerText" class="text-5xl md:text-7xl font-bold text-center mb-16" style="font-family: 'Bungee', sans-serif;">Manollos Spiele Website</h1>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 max-w-5xl mx-auto">
+            <!-- Memory -->
+            <a href="https://manst1.github.io/Memory/memory.html" 
+               class="group bg-blue-600 hover:bg-blue-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
+                <div class="flex flex-col items-center">
+                    <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 10c-3.313 0-6-2.687-6-6s2.687-6 6-6 6 2.687 6 6-2.687 6-6 6z"></path>
+                    </svg>
+                    <span class="text-xl">Memory</span>
+                </div>
+            </a>
+            <!-- Cosmos -->
+            <a href="https://manst1.github.io/Cosmos/cosmos.html" 
+               class="group bg-purple-600 hover:bg-purple-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
+                <div class="flex flex-col items-center">
+                    <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18M3 21h18M12 3v18M3 12h18"></path>
+                    </svg>
+                    <span class="text-xl">Cosmos</span>
+                </div>
+            </a>
+            <!-- Snake -->
+            <a href="https://manst1.github.io/Snake/snake.html" 
+               class="group bg-green-600 hover:bg-green-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
+                <div class="flex flex-col items-center">
+                    <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14c-1.5 0-3-2-3-4s1.5-4 3-4 3 2 3 4-1.5 4-3 4zm-7 6c-1.5 0-3-2-3-4s1.5-4 3-4 3 2 3 4-1.5 4-3 4zm-7-6c-1.5 0-3-2-3-4s1.5-4 3-4 3 2 3 4-1.5 4-3 4z"></path>
+                    </svg>
+                    <span class="text-xl">Snake</span>
+                </div>
+            </a>
+            <!-- Forge -->
+            <a href="https://manst1.github.io/Forge/forge.html" 
+               class="group bg-red-600 hover:bg-red-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
+                <div class="flex flex-col items-center">
+                    <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3h2v6h6v2h-6v6h-2v-6H5V9h6V3z"></path>
+                    </svg>
+                    <span class="text-xl">Forge</span>
+                </div>
+            </a>
+            <!-- PathPulse -->
+            <a href="https://manst1.github.io/PathPulse/pathpulse.html" 
+               class="group bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
+                <div class="flex flex-col items-center">
+                    <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h3l3 8 4-16 3 8h4"></path>
+                    </svg>
+                    <span class="text-xl">PathPulse</span>
+                </div>
+            </a>
+            <!-- Hangman -->
+            <a href="https://manst1.github.io/Hangman/hangman.html" 
+               class="group bg-gray-700 hover:bg-gray-800 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
+                <div class="flex flex-col items-center">
+                    <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 3h12M6 3v18M6 21h6M12 21v-6a2 2 0 012-2h4"></path>
+                    </svg>
+                    <span class="text-xl">Hangman</span>
+                </div>
+            </a>
+			<!-- Yield -->
+			<a href="https://manst1.github.io/Yield/yield.html" 
+			class="group bg-amber-800 hover:bg-amber-900 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
+				<div class="flex flex-col items-center">
+					<svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a4 4 0 014 4v12a4 4 0 01-8 0V6a4 4 0 014-4zm0 4v12M8 10h8"/>
+					</svg>
+					<span class="text-xl">Yield</span>
+				</div>
+			</a>
+			<!-- Tic Tac Toe -->
+			<a href="https://manst1.github.io/TicTacToe/tictactoe.html" 
+			class="group bg-teal-600 hover:bg-teal-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
+				<div class="flex flex-col items-center">
+					<svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8h18M3 16h18M8 3v18M16 3v18"/>
+					</svg>
+					<span class="text-xl">Tic Tac Toe</span>
+				</div>
+			</a>
+			<!-- Dash -->
+			<a href="https://manst1.github.io/Dash/dash.html" 
+			class="group bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
+				<div class="flex flex-col items-center">
+					<svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
+					</svg>
+					<span class="text-xl">Dash</span>
+				</div>
+			</a>
+        </div>
+    </div>
+
+<script>
+    const body = document.getElementById('body');
+    const headerText = document.getElementById('headerText');
+    const colorPicker = document.getElementById('bgColorPicker');
+    const patternSelect = document.getElementById('patternSelect');
+    const colorPickerButton = document.getElementById('colorPickerButton');
+    const colorPickerDropdown = document.getElementById('colorPickerDropdown');
+
+    const defaultGradient = 'linear-gradient(to bottom right, #1e293b, #1e40af, #000000)';
+    body.style.background = defaultGradient;
+
+    // Function to calculate luminance and set contrasting text color
+    function setContrastTextColor(bgColor) {
+        // Remove # from hex color
+        const hex = bgColor.replace('#', '');
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        // Calculate luminance
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        // Use white text for dark backgrounds, black for light
+        headerText.style.color = luminance < 0.5 ? '#ffffff' : '#000000';
+    }
+
+    function updateBackground() {
+        const color = colorPicker.value;
+        const pattern = patternSelect.value;
+        if (pattern === 'solid') {
+            body.style.background = color;
+            setContrastTextColor(color);
+        } else {
+            body.style.background = `linear-gradient(to bottom right, ${color}, #1e40af, #000000)`;
+            setContrastTextColor(color); // Use primary color for contrast calculation
+        }
+    }
+
+    // Toggle dropdown visibility on click
+    colorPickerButton.addEventListener('click', () => {
+        colorPickerDropdown.classList.toggle('hidden');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!colorPickerContainer.contains(e.target)) {
+            colorPickerDropdown.classList.add('hidden');
+        }
+    });
+
+    colorPicker.addEventListener('input', updateBackground);
+    patternSelect.addEventListener('change', updateBackground);
+
+    // Initialize contrast text color
+    setContrastTextColor('#1e293b');
+</script>
+
+</body>
+</html>
