@@ -2,214 +2,509 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Manollos Spiele</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
+    <style>
+        .pattern-preview {
+            width: 100%;
+            height: 40px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+        
+        .close-btn:hover {
+            color: #374151;
+        }
+
+        /* Add outline to header text */
+        #headerText {
+            -webkit-text-stroke: 1px; /* Default stroke width */
+        }
+
+        /* Mobile-specific styles */
+        @media (max-width: 640px) {
+            #headerText {
+                font-size: 8vw; /* Responsive font size */
+            }
+            .pattern-preview {
+                height: 30px;
+            }
+            #colorPickerDropdown {
+                width: 90vw;
+                max-width: 300px;
+                right: 50%;
+                transform: translateX(50%);
+            }
+            #infoTooltip {
+                width: 80vw;
+                max-width: 280px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            .group {
+                padding: 1rem;
+            }
+            .group svg {
+                width: 2.5rem;
+                height: 2.5rem;
+            }
+            .group span {
+                font-size: 1rem;
+            }
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+    </style>
 </head>
 <body class="min-h-screen flex flex-col items-center" id="body">
 
-    <!-- Farbpicker zur Änderung der Hintergrundfarbe -->
-    <div class="fixed top-4 right-4 z-20">
-        <div class="relative" id="colorPickerContainer">
-            <button id="colorPickerButton" class="bg-white text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-lg flex items-center gap-2 hover:bg-gray-100 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4l2 2h6a2 2 0 012 2v10a4 4 0 01-4 4H7z"></path>
+    <!-- Info Icon für Fun Facts -->
+    <div class="fixed top-4 left-4 z-20">
+        <div class="relative" id="infoContainer">
+            <button id="infoButton" class="bg-white text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-lg flex items-center gap-2 hover:bg-gray-100 transition-colors touch-none">
+                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                Hintergrund anpassen
+                Info
             </button>
-            <div id="colorPickerDropdown" class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl p-4 hidden">
-                <label for="bgColorPicker" class="block text-gray-800 font-semibold mb-2">Hintergrundfarbe:</label>
-                <input type="color" id="bgColorPicker" value="#1e293b" class="w-full h-10 rounded border-none cursor-pointer mb-4" />
-                <label for="patternSelect" class="block text-gray-800 font-semibold mb-2">Muster:</label>
-                <select id="patternSelect" class="w-full p-2 rounded border border-gray-300">
-                    <option value="solid">Einfarbig</option>
-                    <option value="gradient">Verlauf</option>
-                </select>
+            <div id="infoTooltip" class="absolute left-0 mt-2 w-64 bg-white rounded-lg shadow-xl p-4 hidden md:w-72">
+                <!-- Fun Fact wird hier dynamisch eingefügt -->
             </div>
         </div>
     </div>
 
-    <div class="container mx-auto px-4 pt-8 pb-12 w-full max-w-7xl">
-        <h1 id="headerText" class="text-5xl md:text-7xl font-bold text-center mb-16" style="font-family: 'Bungee', sans-serif;">Manollos Spiele</h1>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 max-w-5xl mx-auto">
+    <!-- Farbpicker zur Änderung der Hintergrundfarbe -->
+    <div class="fixed top-4 right-4 z-20">
+        <div class="relative" id="colorPickerContainer">
+            <button id="colorPickerButton" class="bg-white text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-lg flex items-center gap-2 hover:bg-gray-100 transition-colors touch-none">
+                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4l2 2h6a2 2 0 012 2v10a4 4 0 01-4 4H7z"></path>
+                </svg>
+                Hintergrund
+            </button>
+            <div id="colorPickerDropdown" class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl p-4 hidden md:w-96">
+                <button class="close-btn" id="closeColorPicker">×</button>
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Hintergrund anpassen</h3>
+                
+                <div class="mb-4">
+                    <label for="bgColorPicker1" class="block text-gray-800 font-semibold mb-2">Erste Farbe:</label>
+                    <input type="color" id="bgColorPicker1" value="#1e293b" class="w-full h-10 rounded border-none cursor-pointer" />
+                </div>
+                
+                <div class="mb-4">
+                    <label for="bgColorPicker2" class="block text-gray-800 font-semibold mb-2">Zweite Farbe:</label>
+                    <input type="color" id="bgColorPicker2" value="#1e40af" class="w-full h-10 rounded border-none cursor-pointer" />
+                </div>
+                
+                <div class="mb-4">
+                    <label for="patternSelect" class="block text-gray-800 font-semibold mb-2">Muster:</label>
+                    <select id="patternSelect" class="w-full p-2 rounded border border-gray-300 mb-2">
+                        <option value="solid">Einfarbig</option>
+                        <option value="gradient">Verlauf</option>
+                        <option value="geometric">Geometrisch</option>
+                        <option value="dots">Punkte</option>
+                        <option value="triangles">Dreiecke</option>
+                        <option value="confetti">Konfetti</option>
+                    </select>
+                    
+                    <!-- Pattern Previews -->
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        <div>
+                            <div class="pattern-preview bg-gray-800" data-pattern="solid"></div>
+                            <span class="text-xs text-gray-600">Einfarbig</span>
+                        </div>
+                        <div>
+                            <div class="pattern-preview bg-gradient-to-br from-gray-800 to-blue-900" data-pattern="gradient"></div>
+                            <span class="text-xs text-gray-600">Verlauf</span>
+                        </div>
+                        <div>
+                            <div class="pattern-preview" style="background: repeating-linear-gradient(45deg, ${color1}, ${color1} 10px, ${color2} 10px, ${color2} 20px);" data-pattern="geometric"></div>
+                            <span class="text-xs text-gray-600">Geometrisch</span>
+                        </div>
+                        <div>
+                            <div class="pattern-preview" style="background: radial-gradient(circle at 25% 25%, #1e40af 2px, transparent 2px), radial-gradient(circle at 75% 75%, #1e40af 2px, transparent 2px); background-color: #1e293b; background-size: 20px 20px;" data-pattern="dots"></div>
+                            <span class="text-xs text-gray-600">Punkte</span>
+                        </div>
+                        <div>
+                            <div class="pattern-preview" style="background: linear-gradient(45deg, #1e40af 25%, transparent 25%, transparent 75%, #1e40af 75%) 0 0/20px 20px, linear-gradient(-45deg, #1e40af 25%, transparent 25%, transparent 75%, #1e40af 75%) 0 0/20px 20px; background-color: #1e293b;" data-pattern="triangles"></div>
+                            <span class="text-xs text-gray-600">Dreiecke</span>
+                        </div>
+                        <div>
+                            <div class="pattern-preview" style="background: radial-gradient(circle at 20% 30%, #1e40af 2px, transparent 2px), radial-gradient(circle at 80% 70%, #1e40af 2px, transparent 2px), radial-gradient(circle at 40% 20%, #1e40af 1px, transparent 1px), radial-gradient(circle at 65% 35%, #1e40af 1px, transparent 1px); background-color: #1e293b; background-size: 50px 50px;" data-pattern="confetti"></div>
+                            <span class="text-xs text-gray-600">Konfetti</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 pt-12 pb-12 w-full max-w-7xl">
+        <h1 id="headerText" class="text-5xl md:text-7xl font-bold text-center mb-12" style="font-family: 'Bungee', sans-serif;">Manollos Spiele</h1>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-5xl mx-auto">
             <!-- Memory -->
             <a href="https://manst1.github.io/Memory/memory.html" 
-               class="group bg-blue-600 hover:bg-blue-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
+               class="group bg-blue-600 hover:bg-blue-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
                 <div class="flex flex-col items-center">
                     <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 10c-3.313 0-6-2.687-6-6s2.687-6 6-6 6 2.687 6 6-2.687 6-6 6z"></path>
                     </svg>
-                    <span class="text-xl">Memory</span>
+                    <span class="text-lg md:text-xl">Memory</span>
                 </div>
             </a>
             <!-- Cosmos -->
             <a href="https://manst1.github.io/Cosmos/cosmos.html" 
-               class="group bg-purple-600 hover:bg-purple-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
+               class="group bg-purple-600 hover:bg-purple-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
                 <div class="flex flex-col items-center">
                     <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18M3 21h18M12 3v18M3 12h18"></path>
                     </svg>
-                    <span class="text-xl">Cosmos</span>
+                    <span class="text-lg md:text-xl">Cosmos</span>
                 </div>
             </a>
             <!-- Snake -->
             <a href="https://manst1.github.io/Snake/snake.html" 
-               class="group bg-green-600 hover:bg-green-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
+               class="group bg-green-600 hover:bg-green-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
                 <div class="flex flex-col items-center">
                     <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14c-1.5 0-3-2-3-4s1.5-4 3-4 3 2 3 4-1.5 4-3 4zm-7 6c-1.5 0-3-2-3-4s1.5-4 3-4 3 2 3 4-1.5 4-3 4zm-7-6c-1.5 0-3-2-3-4s1.5-4 3-4 3 2 3 4-1.5 4-3 4z"></path>
                     </svg>
-                    <span class="text-xl">Snake</span>
+                    <span class="text-lg md:text-xl">Snake</span>
                 </div>
             </a>
             <!-- Forge -->
             <a href="https://manst1.github.io/Forge/forge.html" 
-               class="group bg-red-600 hover:bg-red-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
+               class="group bg-red-600 hover:bg-red-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
                 <div class="flex flex-col items-center">
                     <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3h2v6h6v2h-6v6h-2v-6H5V9h6V3z"></path>
                     </svg>
-                    <span class="text-xl">Forge</span>
+                    <span class="text-lg md:text-xl">Forge</span>
                 </div>
             </a>
-			<!-- Hangman -->
+            <!-- Hangman -->
             <a href="https://manst1.github.io/Hangman/hangman.html" 
-               class="group bg-gray-700 hover:bg-gray-800 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
+               class="group bg-gray-700 hover:bg-gray-800 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
                 <div class="flex flex-col items-center">
                     <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 3h12M6 3v18M6 21h6M12 21v-6a2 2 0 012-2h4"></path>
                     </svg>
-                    <span class="text-xl">Hangman</span>
+                    <span class="text-lg md:text-xl">Hangman</span>
                 </div>
             </a>
-			<!-- Tint -->
-			<a href="https://manst1.github.io/Tint/tint.html" 
-			class="group bg-orange-600 hover:bg-orange-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
-				<div class="flex flex-col items-center">
-					<svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3c-2.5 3-5 5-5 9a5 5 0 0010 0c0-4-2.5-6-5-9z"/>
-					</svg>
-					<span class="text-xl">Tint</span>
-				</div>
-			</a>
-            
-            
-			<!-- Yield -->
-			<a href="https://manst1.github.io/Yield/yield.html" 
-			class="group bg-amber-800 hover:bg-amber-900 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
-				<div class="flex flex-col items-center">
-					<svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a4 4 0 014 4v12a4 4 0 01-8 0V6a4 4 0 014-4zm0 4v12M8 10h8"/>
-					</svg>
-					<span class="text-xl">Yield</span>
-				</div>
-			</a>
-			<!-- Tic Tac Toe -->
-			<a href="https://manst1.github.io/TicTacToe/tictactoe.html" 
-			class="group bg-teal-600 hover:bg-teal-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
-				<div class="flex flex-col items-center">
-					<svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8h18M3 16h18M8 3v18M16 3v18"/>
-					</svg>
-					<span class="text-xl">Tic Tac Toe</span>
-				</div>
-			</a>
-			
-			<!-- Echo -->
+            <!-- Tint -->
+            <a href="https://manst1.github.io/Tint/tint.html" 
+               class="group bg-orange-600 hover:bg-orange-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+                <div class="flex flex-col items-center">
+                    <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3c-2.5 3-5 5-5 9a5 5 0 0010 0c0-4-2.5-6-5-9z"/>
+                    </svg>
+                    <span class="text-lg md:text-xl">Tint</span>
+                </div>
+            </a>
+            <!-- Yield -->
+            <a href="https://manst1.github.io/Yield/yield.html" 
+               class="group bg-amber-800 hover:bg-amber-900 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+                <div class="flex flex-col items-center">
+                    <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a4 4 0 014 4v12a4 4 0 01-8 0V6a4 4 0 014-4zm0 4v12M8 10h8"/>
+                    </svg>
+                    <span class="text-lg md:text-xl">Yield</span>
+                </div>
+            </a>
+            <!-- Tic Tac Toe -->
+            <a href="https://manst1.github.io/TicTacToe/tictactoe.html" 
+               class="group bg-teal-600 hover:bg-teal-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+                <div class="flex flex-col items-center">
+                    <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8h18M3 16h18M8 3v18M16 3v18"/>
+                    </svg>
+                    <span class="text-lg md:text-xl">Tic Tac Toe</span>
+                </div>
+            </a>
+            <!-- Echo -->
             <a href="https://manst1.github.io/Echo/echo.html" 
-               class="group bg-green-900 hover:bg-green-900 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
+               class="group bg-green-900 hover:bg-green-900 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
                 <div class="flex flex-col items-center">
                     <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12M6 12h12M10 8v8M14 8v8"/>
                     </svg>
-                    <span class="text-xl">Echo</span>
+                    <span class="text-lg md:text-xl">Echo</span>
                 </div>
             </a>
-			
-			<!-- PathPulse -->
+            <!-- PathPulse -->
             <a href="https://manst1.github.io/PathPulse/pathpulse.html" 
-               class="group bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
+               class="group bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
                 <div class="flex flex-col items-center">
                     <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h3l3 8 4-16 3 8h4"></path>
                     </svg>
-                    <span class="text-xl">PathPulse</span>
+                    <span class="text-lg md:text-xl">PathPulse</span>
                 </div>
             </a>
-			<!-- Dash -->
-			<a href="https://manst1.github.io/Dash/dash.html" 
-			class="group bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
-				<div class="flex flex-col items-center">
-					<svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
-					</svg>
-					<span class="text-xl">Dash</span>
-				</div>
-			</a>
-		<!-- Color Catcher -->
-<a href="https://manst1.github.io/ColorCatcher/catcher.html" 
-   class="group bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
-    <div class="flex flex-col items-center">
-        <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3a2 2 0 012 2v14a2 2 0 01-2 2H9a2 2 0 01-2-2V5a2 2 0 012-2h6zm-3 14h.01M9 7h6m-6 4h6m-6 4h6"></path>
-        </svg>
-        <span class="text-xl">Color Catcher</span>
-    </div>
-</a>
-<!-- Trax -->
-<a href="https://manst1.github.io/Trax/Trax.html" 
-   class="group bg-pink-800 hover:bg-pink-900 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
-    <div class="flex flex-col items-center">
-        <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3l9 15.6H3L12 3zm0 6l4 6.9H8L12 9z"/>
-        </svg>
-        <span class="text-xl">Trax</span>
-    </div>
-</a>
-
+            <!-- Dash -->
+            <a href="https://manst1.github.io/Dash/dash.html" 
+               class="group bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+                <div class="flex flex-col items-center">
+                    <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
+                    </svg>
+                    <span class="text-lg md:text-xl">Dash</span>
+                </div>
+            </a>
+            <!-- Color Catcher -->
+            <a href="https://manst1.github.io/ColorCatcher/catcher.html" 
+               class="group bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+                <div class="flex flex-col items-center">
+                    <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3a2 2 0 012 2v14a2 2 0 01-2 2H9a2 2 0 01-2-2V5a2 2 0 012-2h6zm-3 14h.01M9 7h6m-6 4h6m-6 4h6"></path>
+                    </svg>
+                    <span class="text-lg md:text-xl">Color Catcher</span>
+                </div>
+            </a>
+            <!-- Trax -->
+            <a href="https://manst1.github.io/Trax/Trax.html" 
+               class="group bg-pink-800 hover:bg-pink-900 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+                <div class="flex flex-col items-center">
+                    <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3l9 15.6H3L12 3zm0 6l4 6.9H8L12 9z"/>
+                    </svg>
+                    <span class="text-lg md:text-xl">Trax</span>
+                </div>
+            </a>
+            <!-- Schnapsen -->
+            <a href="https://manst1.github.io/Schnapsen/schnapsen.html" 
+               class="group bg-gray-500 hover:bg-gray-600 text-white font-semibold py-6 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+                <div class="flex flex-col items-center">
+                    <svg class="w-12 h-12 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #ffffff;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                    </svg>
+                    <span class="text-lg md:text-xl">Schnapsen</span>
+                </div>
+            </a>
         </div>
     </div>
 
 <script>
     const body = document.getElementById('body');
     const headerText = document.getElementById('headerText');
-    const colorPicker = document.getElementById('bgColorPicker');
+    const colorPicker1 = document.getElementById('bgColorPicker1');
+    const colorPicker2 = document.getElementById('bgColorPicker2');
     const patternSelect = document.getElementById('patternSelect');
     const colorPickerButton = document.getElementById('colorPickerButton');
     const colorPickerDropdown = document.getElementById('colorPickerDropdown');
+    const closeColorPicker = document.getElementById('closeColorPicker');
+    const infoButton = document.getElementById('infoButton');
+    const infoTooltip = document.getElementById('infoTooltip');
+    const infoContainer = document.getElementById('infoContainer');
+    const patternPreviews = document.querySelectorAll('.pattern-preview');
 
-    const defaultGradient = 'linear-gradient(to bottom right, #1e293b, #1e40af, #000000)';
-    body.style.background = defaultGradient;
+    // Fun Facts Array - Platzhalter für 366 Fun Facts (einen pro Tag, inkl. Schaltjahr)
+    const funFacts = [
+        "Der 1. Jänner wurde 46 v. Chr. von Julius Cäsar als Jahresbeginn festgelegt – zu Ehren des zweigesichtigen Gottes Janus, der zugleich in Vergangenheit und Zukunft blickt.",
+        "Die meisten bekannten Casinos und Hotels in Las Vegas stehen eigentlich in der anliegenden Stadt Paradise.",
+        "3. Jänner auf Kirgisisch heißt: <br>3-январь.",
+        "Am 4. Jänner ist die Erde der Sonna am nähesten.",
+        "Am 5. Jänner 1933 begann der Bau der Golden Gate Bridge.",
+        "Am 6. Jänner 2021 stürzten <br>Trump-Anhänger das  <br>US-Kapitol.",
+        "Nikola Tesla starb am 7. Jänner in NYC.",
+        "Am 8. Jänner 2016 wurde der mexikanische Drogenboss <br>El Chapo verhaftet.",	
+        "Am 9. Jänner 2007 stellte Steve Jobs erstmals das Iphone vor.",
+        "Napoleon ließ sich am 10. Jänner von seiner Frau scheiden.",	
+        "Mark Forster hat am 11. Jänner Geburstag.",
+        "Jeff Bezos hat am 12. Jänner Geburtstag.",
+        "Am 13. Jänner 1993 ging der ehemalige Staatschef der DDR, Erich Honecker, nach Chile ins Exil.",
+        "Die 38. größte Stadt in Venezuela (ca. 150 000 Einwohner) heißt El Limón.",
+        "Der 15. Jänner ist der Geburtstag von Giddes Chalamanda, einem Musiker aus Malawi."
+    ];
 
-    // Function to calculate luminance and set contrasting text color
+    // Berechne den Tag des Jahres (1-366)
+    function getDayOfYear() {
+        const now = new Date();
+        const start = new Date(now.getFullYear(), 0, 0);
+        const diff = (now - start) + ((start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000);
+        const oneDay = 1000 * 60 * 60 * 24;
+        const day = Math.floor(diff / oneDay);
+        return day;
+    }
+
+    // Setze den Fun Fact des Tages
+    const dayOfYear = getDayOfYear();
+    infoTooltip.innerHTML = funFacts[dayOfYear - 1] || 'Kein Fun Fact verfügbar.';
+
+    // Detect if device is likely mobile (based on screen width or touch support)
+    const isMobile = window.matchMedia("(max-width: 640px)").matches || 'ontouchstart' in window;
+
+    // Toggle Info Tooltip based on device
+    if (isMobile) {
+        // For mobile: toggle on click
+        infoButton.addEventListener('click', () => {
+            infoTooltip.classList.toggle('hidden');
+        });
+    } else {
+        // For desktop: show on hover
+        infoButton.addEventListener('mouseenter', () => {
+            infoTooltip.classList.remove('hidden');
+        });
+        infoButton.addEventListener('mouseleave', () => {
+            infoTooltip.classList.add('hidden');
+        });
+    }
+
+    // Close tooltip when clicking outside (for mobile)
+    document.addEventListener('click', (e) => {
+        if (isMobile && !infoContainer.contains(e.target)) {
+            infoTooltip.classList.add('hidden');
+        }
+    });
+
+    // Function to calculate luminance and set contrasting text color and outline
     function setContrastTextColor(bgColor) {
-        // Remove # from hex color
         const hex = bgColor.replace('#', '');
         const r = parseInt(hex.substring(0, 2), 16);
         const g = parseInt(hex.substring(2, 4), 16);
         const b = parseInt(hex.substring(4, 6), 16);
-        // Calculate luminance
         const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-        // Use white text for dark backgrounds, black for light
-        headerText.style.color = luminance < 0.5 ? '#ffffff' : '#000000';
+        const textColor = luminance < 0.5 ? '#ffffff' : '#000000';
+        const strokeColor = luminance < 0.5 ? '#000000' : '#ffffff';
+        headerText.style.color = textColor;
+        headerText.style.webkitTextStrokeColor = strokeColor;
     }
 
-    function updateBackground() {
-        const color = colorPicker.value;
+    // Update Background basierend auf Auswahl
+    function updateBackground(save = true) {
+        const color1 = colorPicker1.value;
+        const color2 = colorPicker2.value;
         const pattern = patternSelect.value;
-        if (pattern === 'solid') {
-            body.style.background = color;
-            setContrastTextColor(color);
-        } else {
-            body.style.background = `linear-gradient(to bottom right, ${color}, #1e40af, #000000)`;
-            setContrastTextColor(color); // Use primary color for contrast calculation
+
+        // Update pattern previews dynamically
+        patternPreviews.forEach(preview => {
+            const patternType = preview.getAttribute('data-pattern');
+            switch (patternType) {
+                case 'solid':
+                    preview.style.background = color1;
+                    break;
+                case 'gradient':
+                    preview.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
+                    break;
+                case 'geometric':
+                    preview.style.background = `repeating-linear-gradient(45deg, ${color1}, ${color1} 10px, ${color2} 10px, ${color2} 20px)`;
+                    break;
+                case 'dots':
+                    preview.style.background = `
+                        radial-gradient(circle at 25% 25%, ${color2} 2px, transparent 2px),
+                        radial-gradient(circle at 75% 75%, ${color2} 2px, transparent 2px)
+                    `;
+                    preview.style.backgroundColor = color1;
+                    preview.style.backgroundSize = '20px 20px';
+                    break;
+                case 'triangles':
+                    preview.style.background = `
+                        linear-gradient(45deg, ${color2} 25%, transparent 25%, transparent 75%, ${color2} 75%) 0 0/20px 20px,
+                        linear-gradient(-45deg, ${color2} 25%, transparent 25%, transparent 75%, ${color2} 75%) 0 0/20px 20px
+                    `;
+                    preview.style.backgroundColor = color1;
+                    break;
+                case 'confetti':
+                    preview.style.background = `
+                        radial-gradient(circle at 20% 30%, ${color2} 2px, transparent 2px),
+                        radial-gradient(circle at 80% 70%, ${color2} 2px, transparent 2px),
+                        radial-gradient(circle at 40% 20%, ${color2} 1px, transparent 1px),
+                        radial-gradient(circle at 65% 35%, ${color2} 1px, transparent 1px)
+                    `;
+                    preview.style.backgroundColor = color1;
+                    preview.style.backgroundSize = '50px 50px';
+                    break;
+            }
+        });
+
+        switch (pattern) {
+            case 'solid':
+                body.style.background = color1;
+                break;
+            case 'gradient':
+                body.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
+                break;
+            case 'geometric':
+                body.style.background = `repeating-linear-gradient(45deg, ${color1}, ${color1} 10px, ${color2} 10px, ${color2} 20px)`;
+                break;
+            case 'dots':
+                body.style.background = `
+                    radial-gradient(circle at 25% 25%, ${color2} 2px, transparent 2px),
+                    radial-gradient(circle at 75% 75%, ${color2} 2px, transparent 2px)
+                `;
+                body.style.backgroundColor = color1;
+                body.style.backgroundSize = '40px 40px';
+                break;
+            case 'triangles':
+                body.style.background = `
+                    linear-gradient(45deg, ${color2} 25%, transparent 25%, transparent 75%, ${color2} 75%) 0 0/40px 40px,
+                    linear-gradient(-45deg, ${color2} 25%, transparent 25%, transparent 75%, ${color2} 75%) 0 0/40px 40px
+                `;
+                body.style.backgroundColor = color1;
+                break;
+            case 'confetti':
+                body.style.background = `
+                    radial-gradient(circle at 20% 30%, ${color2} 2px, transparent 2px),
+                    radial-gradient(circle at 80% 70%, ${color2} 2px, transparent 2px),
+                    radial-gradient(circle at 40% 20%, ${color2} 1px, transparent 1px),
+                    radial-gradient(circle at 65% 35%, ${color2} 1px, transparent 1px),
+                    radial-gradient(circle at 35% 65%, ${color2} 1.5px, transparent 1.5px),
+                    radial-gradient(circle at 85% 40%, ${color2} 1.5px, transparent 1.5px)
+                `;
+                body.style.backgroundColor = color1;
+                body.style.backgroundSize = '60px 60px';
+                break;
+            default:
+                body.style.background = color1;
         }
+        setContrastTextColor(color1);
+
+        if (save) {
+            localStorage.setItem('bgSettings', JSON.stringify({
+                color1,
+                color2,
+                pattern
+            }));
+        }
+    }
+
+    // Lade gespeicherte Einstellungen
+    const savedSettings = JSON.parse(localStorage.getItem('bgSettings'));
+    if (savedSettings) {
+        colorPicker1.value = savedSettings.color1 || '#1e293b';
+        colorPicker2.value = savedSettings.color2 || '#1e40af';
+        patternSelect.value = savedSettings.pattern || 'gradient';
+        updateBackground(false);
+    } else {
+        updateBackground(false);
     }
 
     // Toggle dropdown visibility on click
     colorPickerButton.addEventListener('click', () => {
         colorPickerDropdown.classList.toggle('hidden');
+    });
+
+    // Close dropdown with close button
+    closeColorPicker.addEventListener('click', () => {
+        colorPickerDropdown.classList.add('hidden');
     });
 
     // Close dropdown when clicking outside
@@ -219,13 +514,19 @@
         }
     });
 
-    colorPicker.addEventListener('input', updateBackground);
+    // Pattern preview click handler
+    patternPreviews.forEach(preview => {
+        preview.addEventListener('click', () => {
+            const pattern = preview.getAttribute('data-pattern');
+            patternSelect.value = pattern;
+            updateBackground();
+        });
+    });
+
+    // Event Listener für Änderungen
+    colorPicker1.addEventListener('input', updateBackground);
+    colorPicker2.addEventListener('input', updateBackground);
     patternSelect.addEventListener('change', updateBackground);
-
-    // Initialize contrast text color
-    setContrastTextColor('#1e293b');
 </script>
-
 </body>
 </html>
-
