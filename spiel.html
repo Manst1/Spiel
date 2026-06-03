@@ -50,12 +50,6 @@
                 right: 50%;
                 transform: translateX(50%);
             }
-            #infoTooltip {
-                width: 80vw;
-                max-width: 280px;
-                left: 50%;
-                transform: translateX(-50%);
-            }
             .group {
                 padding: 1.5rem;
             }
@@ -75,19 +69,12 @@
 </head>
 <body class="min-h-screen flex flex-col items-center" id="body">
 
-    <!-- Info Icon für Fun Facts -->
+    <!-- Mini-Game Target Button -->
     <div class="fixed top-4 left-4 z-20">
-        <div class="relative" id="infoContainer">
-            <button id="infoButton" class="bg-white text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-lg flex items-center gap-2 hover:bg-gray-100 transition-colors touch-none">
-                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                Info
-            </button>
-            <div id="infoTooltip" class="absolute left-0 mt-2 w-64 bg-white rounded-lg shadow-xl p-4 hidden md:w-72">
-                <!-- Fun Fact wird hier dynamisch eingefügt -->
-            </div>
-        </div>
+        <button id="miniGameButton" title="Mini Game" class="bg-white text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-lg flex items-center gap-2 hover:bg-gray-100 transition-colors touch-none">
+            <img src="https://i.imgur.com/kARqz8d.png" alt="Target" class="w-5 h-5 md:w-6 md:h-6">
+            Target
+        </button>
     </div>
 
     <!-- Farbpicker zur Änderung der Hintergrundfarbe -->
@@ -366,6 +353,34 @@
     </div>
 </a>
 
+<!-- KeyRush -->
+<a href="https://manst1.github.io/KeyRush/index.html" 
+   class="group bg-[#E8A06A] hover:bg-[#D98C56] text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+    <div class="flex flex-col items-center">
+        <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="7" cy="12" r="4" stroke-width="2"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 12h10M17 12v3M20 12v2"/>
+            <circle cx="7" cy="12" r="1.5" fill="currentColor"/>
+        </svg>
+        <span class="text-xl md:text-2xl">Key Rush</span>
+    </div>
+</a>
+
+<!-- Penalty -->
+<a href="https://manst1.github.io/Penalty/index.html" 
+   class="group bg-[#1E7A3A] hover:bg-[#186330] text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+    <div class="flex flex-col items-center">
+        <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <polygon
+                points="12,4 18,7.5 18,14.5 12,18 6,14.5 6,7.5"
+                stroke-width="2"
+                stroke-linejoin="round"
+            />
+        </svg>
+        <span class="text-xl md:text-2xl">Penalty</span>
+    </div>
+</a>
+
 
 		
         </div>
@@ -380,65 +395,204 @@
     const colorPickerButton = document.getElementById('colorPickerButton');
     const colorPickerDropdown = document.getElementById('colorPickerDropdown');
     const closeColorPicker = document.getElementById('closeColorPicker');
-    const infoButton = document.getElementById('infoButton');
-    const infoTooltip = document.getElementById('infoTooltip');
-    const infoContainer = document.getElementById('infoContainer');
+    const miniGameButton = document.getElementById('miniGameButton');
     const patternPreviews = document.querySelectorAll('.pattern-preview');
-
-    // Fun Facts Array
-    const funFacts = [
-        "Der 1. Jänner wurde 46 v. Chr. von Julius Cäsar als Jahresbeginn festgelegt – zu Ehren des zweigesichtigen Gottes Janus, der zugleich in Vergangenheit und Zukunft blickt.",
-        "Die meisten bekannten Casinos und Hotels in Las Vegas stehen eigentlich in der anliegenden Stadt Paradise.",
-        "Am 3. Jänner 2026 wurde der venezolanische Präsident Nicolás Maduro von den USA auf den Befehl von Donuld Trump aus Venezuela entführt.",
-        "Am 4. Jänner ist die Erde der Sonna am nähesten.",
-        "Am 5. Jänner 1933 begann der Bau der Golden Gate Bridge.",
-        "Am 6. Jänner 2021 stürzten <br>Trump-Anhänger das  <br>US-Kapitol.",
-        "Nikola Tesla starb am 7. Jänner in NYC.",
-        "Am 8. Jänner 2016 wurde der mexikanische Drogenboss <br>El Chapo verhaftet.",	
-        "Am 9. Jänner 2007 stellte Steve Jobs erstmals das Iphone vor.",
-        "Napoleon ließ sich am 10. Jänner von seiner Frau scheiden.",	
-        "Mark Forster hat am 11. Jänner Geburstag.",
-        "Jeff Bezos hat am 12. Jänner Geburtstag.",
-        "Am 13. Jänner 1993 ging der ehemalige Staatschef der DDR, Erich Honecker, nach Chile ins Exil.",
-        "Die 38. größte Stadt in Venezuela (ca. 150 000 Einwohner) heißt El Limón.",
-        "Der 15. Jänner ist der Geburtstag von Giddes Chalamanda, einem Musiker aus Malawi.",
-		"16. Jänner auf Kirgisisch heißt: 16-январь.",
-        "Am 17. Jänner hat Michelle Obama Geburtstag.",
-        "Am 13. Jänner 1993 ging der ehemalige Staatschef der DDR, Erich Honecker, nach Chile ins Exil.",
-        "Die 38. größte Stadt in Venezuela (ca. 150 000 Einwohner) heißt El Limón.",
-        "Der 15. Jänner ist der Geburtstag von Giddes Chalamanda, einem Musiker aus Malawi."
-    ];
-
-    function getDayOfYear() {
-        const now = new Date();
-        const start = new Date(now.getFullYear(), 0, 0);
-        const diff = (now - start) + ((start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000);
-        const oneDay = 1000 * 60 * 60 * 24;
-        const day = Math.floor(diff / oneDay);
-        return day;
-    }
-
-    const dayOfYear = getDayOfYear();
-    infoTooltip.innerHTML = funFacts[dayOfYear - 1] || 'Kein Fun Fact verfügbar.';
 
     const isMobile = window.matchMedia("(max-width: 640px)").matches || 'ontouchstart' in window;
 
-    if (isMobile) {
-        infoButton.addEventListener('click', () => {
-            infoTooltip.classList.toggle('hidden');
-        });
-    } else {
-        infoButton.addEventListener('mouseenter', () => {
-            infoTooltip.classList.remove('hidden');
-        });
-        infoButton.addEventListener('mouseleave', () => {
-            infoTooltip.classList.add('hidden');
-        });
+    let activeMiniGame = null;
+
+    const miniGames = ['dark', 'red', 'bounce', 'random', 'upside'];
+
+    function clearMiniGame() {
+        document.querySelectorAll('.mini-game-layer, .mini-game-ball, .mini-game-note').forEach(el => el.remove());
+        document.body.style.cursor = '';
+        document.body.style.transform = '';
+        document.body.style.transformOrigin = '';
+        if (activeMiniGame?.cleanup) activeMiniGame.cleanup();
+        activeMiniGame = null;
     }
 
-    document.addEventListener('click', (e) => {
-        if (isMobile && !infoContainer.contains(e.target)) {
-            infoTooltip.classList.add('hidden');
+    function startRandomMiniGame() {
+        const pick = miniGames[Math.floor(Math.random() * miniGames.length)];
+        startMiniGame(pick);
+    }
+
+    function startMiniGame(game) {
+        clearMiniGame();
+        if (game === 'dark') startDarkMiniGame();
+        if (game === 'red') startRedMiniGame();
+        if (game === 'bounce') startBounceMiniGame();
+        if (game === 'random') openRandomGame();
+        if (game === 'upside') startUpsideDown();
+    }
+
+    function startDarkMiniGame() {
+        const layer = document.createElement('div');
+        layer.className = 'mini-game-layer';
+        layer.style.cssText = 'position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:9999;transition:opacity 20s linear;';
+        document.body.appendChild(layer);
+        requestAnimationFrame(() => { layer.style.opacity = '1'; });
+
+        const closeTimer = setTimeout(() => {
+            window.close();
+            document.body.innerHTML = '';
+            document.body.style.background = '#000';
+        }, 20500);
+
+        activeMiniGame = { cleanup: () => clearTimeout(closeTimer) };
+    }
+
+    function startRedMiniGame() {
+        const canvas = document.createElement('canvas');
+        canvas.className = 'mini-game-layer';
+        canvas.style.cssText = 'position:fixed;inset:0;z-index:9998;touch-action:none;cursor:none;';
+        document.body.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+
+        let width, height, animationFrame, spreadTimer;
+        const blobs = [];
+        let brushX = -100;
+        let brushY = -100;
+
+        const brush = document.createElement('div');
+        brush.className = 'mini-game-layer';
+        brush.style.cssText = 'position:fixed;width:70px;height:70px;border:4px solid white;border-radius:50%;box-shadow:0 0 0 2px #222;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(brush);
+
+        const note = document.createElement('div');
+        note.className = 'mini-game-note';
+        note.textContent = 'Brush the red away!';
+        note.style.cssText = 'position:fixed;left:50%;top:20px;transform:translateX(-50%);z-index:10000;background:white;color:#991b1b;font-weight:bold;padding:10px 14px;border-radius:12px;box-shadow:0 4px 16px #0004;';
+        document.body.appendChild(note);
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        function addBlob() {
+            blobs.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                r: 12 + Math.random() * 20,
+                grow: 0.7 + Math.random() * 1.2
+            });
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = 'rgba(190, 0, 0, 0.88)';
+            blobs.forEach(blob => {
+                blob.r += blob.grow;
+                ctx.beginPath();
+                ctx.arc(blob.x, blob.y, blob.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(brushX, brushY, 48, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalCompositeOperation = 'source-over';
+
+            animationFrame = requestAnimationFrame(draw);
+        }
+
+        function moveBrush(x, y) {
+            brushX = x;
+            brushY = y;
+            brush.style.left = x + 'px';
+            brush.style.top = y + 'px';
+        }
+
+        const mouseMove = e => moveBrush(e.clientX, e.clientY);
+        const touchMove = e => {
+            e.preventDefault();
+            const t = e.touches[0];
+            if (t) moveBrush(t.clientX, t.clientY);
+        };
+
+        resizeCanvas();
+        for (let i = 0; i < 7; i++) addBlob();
+        spreadTimer = setInterval(addBlob, 650);
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('mousemove', mouseMove);
+        window.addEventListener('touchmove', touchMove, { passive: false });
+        draw();
+
+        activeMiniGame = { cleanup: () => {
+            cancelAnimationFrame(animationFrame);
+            clearInterval(spreadTimer);
+            window.removeEventListener('resize', resizeCanvas);
+            window.removeEventListener('mousemove', mouseMove);
+            window.removeEventListener('touchmove', touchMove);
+        }};
+    }
+
+    function startBounceMiniGame() {
+        const ball = document.createElement('div');
+        ball.className = 'mini-game-ball';
+        ball.style.cssText = 'position:fixed;left:50%;top:50%;width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #fff, #38bdf8 35%, #1d4ed8);z-index:9999;box-shadow:0 8px 20px #0006;cursor:pointer;';
+        document.body.appendChild(ball);
+
+        let x = window.innerWidth / 2;
+        let y = window.innerHeight / 2;
+        let vx = 5;
+        let vy = 4;
+        let animationFrame;
+
+        function randomKick() {
+            const speed = 9;
+            const angle = Math.random() * Math.PI * 2;
+            vx = Math.cos(angle) * speed;
+            vy = Math.sin(angle) * speed;
+        }
+
+        function move() {
+            x += vx;
+            y += vy;
+            const size = 46;
+            if (x <= 0 || x + size >= window.innerWidth) vx *= -1;
+            if (y <= 0 || y + size >= window.innerHeight) vy *= -1;
+            x = Math.max(0, Math.min(window.innerWidth - size, x));
+            y = Math.max(0, Math.min(window.innerHeight - size, y));
+            ball.style.left = x + 'px';
+            ball.style.top = y + 'px';
+            animationFrame = requestAnimationFrame(move);
+        }
+
+        ball.addEventListener('click', randomKick);
+        ball.addEventListener('touchstart', randomKick);
+        move();
+
+        activeMiniGame = { cleanup: () => cancelAnimationFrame(animationFrame) };
+    }
+
+    function openRandomGame() {
+        const links = Array.from(document.querySelectorAll('a[href]')).map(a => a.href).filter(href => href.includes('manst1.github.io'));
+        const randomLink = links[Math.floor(Math.random() * links.length)];
+        if (randomLink) window.open(randomLink, '_blank');
+    }
+
+    function startUpsideDown() {
+        document.body.style.transform = 'rotate(180deg)';
+        document.body.style.transformOrigin = 'center center';
+        activeMiniGame = { cleanup: () => {} };
+    }
+
+    miniGameButton.addEventListener('click', startRandomMiniGame);
+
+    let cheatBuffer = '';
+    document.addEventListener('keydown', (e) => {
+        if (e.key.length !== 1) return;
+        cheatBuffer = (cheatBuffer + e.key.toLowerCase()).slice(-20);
+        for (const game of miniGames) {
+            if (cheatBuffer.endsWith(game)) {
+                startMiniGame(game);
+                cheatBuffer = '';
+                break;
+            }
         }
     });
 
