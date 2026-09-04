@@ -4,9 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Manollos Spiele</title>
-	<link rel="icon" type="image/png" href="https://i.imgur.com/FxoE9VM.png">
+
+    <link rel="icon" type="image/png" href="https://i.imgur.com/FxoE9VM.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
+
     <style>
         .pattern-preview {
             width: 100%;
@@ -15,7 +19,20 @@
             margin-bottom: 8px;
             border: 1px solid #e5e7eb;
         }
-        
+/* Game opening transition */
+.game-transition-overlay {
+    position: fixed;
+    z-index: 99999;
+    pointer-events: none;
+    margin: 0;
+    border-radius: 8px;
+    transition:
+        top 0.9s cubic-bezier(0.76, 0, 0.24, 1),
+        left 0.9s cubic-bezier(0.76, 0, 0.24, 1),
+        width 0.9s cubic-bezier(0.76, 0, 0.24, 1),
+        height 0.9s cubic-bezier(0.76, 0, 0.24, 1),
+        border-radius 0.9s cubic-bezier(0.76, 0, 0.24, 1);
+}
         .close-btn {
             position: absolute;
             top: 8px;
@@ -26,83 +43,228 @@
             cursor: pointer;
             color: #6b7280;
         }
-        
+
         .close-btn:hover {
             color: #374151;
         }
 
         /* Add outline to header text */
         #headerText {
-            -webkit-text-stroke: 1px; /* Default stroke width */
+            -webkit-text-stroke: 1px;
         }
 
         /* Mobile-specific styles */
         @media (max-width: 640px) {
             #headerText {
-                font-size: 8vw; /* Responsive font size */
+                font-size: 8vw;
             }
+
             .pattern-preview {
                 height: 30px;
             }
+
             #colorPickerDropdown {
                 width: 90vw;
                 max-width: 300px;
                 right: 50%;
                 transform: translateX(50%);
             }
+
             .group {
                 padding: 1.5rem;
             }
+
             .group svg {
                 width: 3.5rem;
                 height: 3.5rem;
             }
+
             .group span {
                 font-size: 1.25rem;
             }
+
             .container {
                 padding-left: 1rem;
                 padding-right: 1rem;
             }
         }
+
+
+        /* Random-event corner button */
+        #chaosButton {
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 300000;
+            width: 86px;
+            height: 86px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-drag: none;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,.35));
+            transition: transform .12s ease;
+        }
+
+        #chaosButton:hover { transform: scale(1.06); }
+        #chaosButton:active { transform: scale(.95); }
+        #chaosButton img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+            -webkit-user-drag: none;
+        }
+
+        #pageWorld {
+            width: 100%;
+            min-height: 100vh;
+            transform-origin: center center;
+            transition: transform .75s cubic-bezier(.2,.8,.2,1);
+        }
+
+        .chaos-ball {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 120000;
+            width: 42px;
+            height: 42px;
+            border-radius: 9999px;
+            background: radial-gradient(circle at 30% 28%, #ffffff 0 7%, #7dd3fc 10%, #2563eb 45%, #172554 100%);
+            box-shadow: 0 5px 12px rgba(0,0,0,.35);
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .chaos-ball:active { cursor: grabbing; }
+
+        .red-mess-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 150000;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none; /* the red dye never blocks games/buttons */
+        }
+
+        .red-brush-cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 130px;
+            height: 130px;
+            margin-left: -65px;
+            margin-top: -65px;
+            border: 3px solid rgba(255,255,255,.95);
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px rgba(0,0,0,.35), 0 2px 8px rgba(0,0,0,.35);
+            z-index: 160000;
+            pointer-events: none;
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            #chaosButton {
+                width: 66px;
+                height: 66px;
+                top: 10px;
+                left: 10px;
+            }
+        }
     </style>
 </head>
+
 <body class="min-h-screen flex flex-col items-center" id="body">
 
-    <!-- Mini-Game Target Button -->
-    <div class="fixed top-4 left-4 z-20">
-        <button id="miniGameButton" title="Mini Game" class="bg-white text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-lg flex items-center gap-2 hover:bg-gray-100 transition-colors touch-none">
-            <img src="https://i.imgur.com/kARqz8d.png" alt="Target" class="w-5 h-5 md:w-6 md:h-6">
-            Target
-        </button>
-    </div>
+    <button id="chaosButton" type="button" aria-label="Random event">
+        <img id="chaosButtonImage" src="https://i.imgur.com/9YjVx84.png" alt="Random event">
+    </button>
+
+    <div id="pageWorld">
 
     <!-- Farbpicker zur Änderung der Hintergrundfarbe -->
     <div class="fixed top-4 right-4 z-20">
         <div class="relative" id="colorPickerContainer">
-            <button id="colorPickerButton" class="bg-white text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-lg flex items-center gap-2 hover:bg-gray-100 transition-colors touch-none">
-                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4l2 2h6a2 2 0 012 2v10a4 4 0 01-4 4H7z"></path>
+
+            <button
+                id="colorPickerButton"
+                class="bg-white text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-lg flex items-center gap-2 hover:bg-gray-100 transition-colors touch-none"
+            >
+                <svg
+                    class="w-5 h-5 md:w-6 md:h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4l2 2h6a2 2 0 012 2v10a4 4 0 01-4 4H7z"
+                    ></path>
                 </svg>
+
                 Hintergrund
             </button>
-            <div id="colorPickerDropdown" class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl p-4 hidden md:w-96">
+
+            <div
+                id="colorPickerDropdown"
+                class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl p-4 hidden md:w-96"
+            >
                 <button class="close-btn" id="closeColorPicker">×</button>
-                <h3 class="text-lg font-bold text-gray-800 mb-4">Hintergrund anpassen</h3>
-                
+
+                <h3 class="text-lg font-bold text-gray-800 mb-4">
+                    Hintergrund anpassen
+                </h3>
+
                 <div class="mb-4">
-                    <label for="bgColorPicker1" class="block text-gray-800 font-semibold mb-2">Erste Farbe:</label>
-                    <input type="color" id="bgColorPicker1" value="#1e293b" class="w-full h-10 rounded border-none cursor-pointer" />
+                    <label
+                        for="bgColorPicker1"
+                        class="block text-gray-800 font-semibold mb-2"
+                    >
+                        Erste Farbe:
+                    </label>
+
+                    <input
+                        type="color"
+                        id="bgColorPicker1"
+                        value="#1e293b"
+                        class="w-full h-10 rounded border-none cursor-pointer"
+                    />
                 </div>
-                
+
                 <div class="mb-4">
-                    <label for="bgColorPicker2" class="block text-gray-800 font-semibold mb-2">Zweite Farbe:</label>
-                    <input type="color" id="bgColorPicker2" value="#1e40af" class="w-full h-10 rounded border-none cursor-pointer" />
+                    <label
+                        for="bgColorPicker2"
+                        class="block text-gray-800 font-semibold mb-2"
+                    >
+                        Zweite Farbe:
+                    </label>
+
+                    <input
+                        type="color"
+                        id="bgColorPicker2"
+                        value="#1e40af"
+                        class="w-full h-10 rounded border-none cursor-pointer"
+                    />
                 </div>
-                
+
                 <div class="mb-4">
-                    <label for="patternSelect" class="block text-gray-800 font-semibold mb-2">Muster:</label>
-                    <select id="patternSelect" class="w-full p-2 rounded border border-gray-300 mb-2">
+                    <label
+                        for="patternSelect"
+                        class="block text-gray-800 font-semibold mb-2"
+                    >
+                        Muster:
+                    </label>
+
+                    <select
+                        id="patternSelect"
+                        class="w-full p-2 rounded border border-gray-300 mb-2"
+                    >
                         <option value="solid">Einfarbig</option>
                         <option value="gradient">Verlauf</option>
                         <option value="geometric">Geometrisch</option>
@@ -110,48 +272,108 @@
                         <option value="triangles">Dreiecke</option>
                         <option value="confetti">Konfetti</option>
                     </select>
-                    
+
                     <!-- Pattern Previews -->
                     <div class="grid grid-cols-2 gap-2 mt-2">
+
                         <div>
-                            <div class="pattern-preview bg-gray-800" data-pattern="solid"></div>
+                            <div
+                                class="pattern-preview bg-gray-800"
+                                data-pattern="solid"
+                            ></div>
                             <span class="text-xs text-gray-600">Einfarbig</span>
                         </div>
+
                         <div>
-                            <div class="pattern-preview bg-gradient-to-br from-gray-800 to-blue-900" data-pattern="gradient"></div>
+                            <div
+                                class="pattern-preview bg-gradient-to-br from-gray-800 to-blue-900"
+                                data-pattern="gradient"
+                            ></div>
                             <span class="text-xs text-gray-600">Verlauf</span>
                         </div>
+
                         <div>
-                            <div class="pattern-preview" style="background: repeating-linear-gradient(45deg, ${color1}, ${color1} 10px, ${color2} 10px, ${color2} 20px);" data-pattern="geometric"></div>
+                            <div
+                                class="pattern-preview"
+                                data-pattern="geometric"
+                            ></div>
                             <span class="text-xs text-gray-600">Geometrisch</span>
                         </div>
+
                         <div>
-                            <div class="pattern-preview" style="background: radial-gradient(circle at 25% 25%, #1e40af 2px, transparent 2px), radial-gradient(circle at 75% 75%, #1e40af 2px, transparent 2px); background-color: #1e293b; background-size: 20px 20px;" data-pattern="dots"></div>
+                            <div
+                                class="pattern-preview"
+                                style="
+                                    background:
+                                        radial-gradient(circle at 25% 25%, #1e40af 2px, transparent 2px),
+                                        radial-gradient(circle at 75% 75%, #1e40af 2px, transparent 2px);
+                                    background-color: #1e293b;
+                                    background-size: 20px 20px;
+                                "
+                                data-pattern="dots"
+                            ></div>
+
                             <span class="text-xs text-gray-600">Punkte</span>
                         </div>
+
                         <div>
-                            <div class="pattern-preview" style="background: linear-gradient(45deg, #1e40af 25%, transparent 25%, transparent 75%, #1e40af 75%) 0 0/20px 20px, linear-gradient(-45deg, #1e40af 25%, transparent 25%, transparent 75%, #1e40af 75%) 0 0/20px 20px; background-color: #1e293b;" data-pattern="triangles"></div>
+                            <div
+                                class="pattern-preview"
+                                style="
+                                    background:
+                                        linear-gradient(45deg, #1e40af 25%, transparent 25%, transparent 75%, #1e40af 75%) 0 0/20px 20px,
+                                        linear-gradient(-45deg, #1e40af 25%, transparent 25%, transparent 75%, #1e40af 75%) 0 0/20px 20px;
+                                    background-color: #1e293b;
+                                "
+                                data-pattern="triangles"
+                            ></div>
+
                             <span class="text-xs text-gray-600">Dreiecke</span>
                         </div>
+
                         <div>
-                            <div class="pattern-preview" style="background: radial-gradient(circle at 20% 30%, #1e40af 2px, transparent 2px), radial-gradient(circle at 80% 70%, #1e40af 2px, transparent 2px), radial-gradient(circle at 40% 20%, #1e40af 1px, transparent 1px), radial-gradient(circle at 65% 35%, #1e40af 1px, transparent 1px); background-color: #1e293b; background-size: 50px 50px;" data-pattern="confetti"></div>
+                            <div
+                                class="pattern-preview"
+                                style="
+                                    background:
+                                        radial-gradient(circle at 20% 30%, #1e40af 2px, transparent 2px),
+                                        radial-gradient(circle at 80% 70%, #1e40af 2px, transparent 2px),
+                                        radial-gradient(circle at 40% 20%, #1e40af 1px, transparent 1px),
+                                        radial-gradient(circle at 65% 35%, #1e40af 1px, transparent 1px);
+                                    background-color: #1e293b;
+                                    background-size: 50px 50px;
+                                "
+                                data-pattern="confetti"
+                            ></div>
+
                             <span class="text-xs text-gray-600">Konfetti</span>
                         </div>
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+
     <div class="container mx-auto px-4 pt-12 pb-12 w-full max-w-7xl">
-        <h1 id="headerText" class="text-5xl md:text-7xl font-bold text-center mb-12" style="font-family: 'Bungee', sans-serif;">Manollos Spiele</h1>
-        
-        <!-- Updated Grid: 1-2-3-4 columns -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-6xl mx-auto">
+
+        <h1
+            id="headerText"
+            class="text-5xl md:text-7xl font-bold text-center mb-12"
+            style="font-family: 'Bungee', sans-serif;"
+        >
+            Manollos Spiele
+        </h1>
+
+
+        <div id="gameGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-6xl mx-auto">
 
             <!-- Memory -->
-            <a href="https://manst1.github.io/Memory/memory.html" 
-               class="group bg-blue-600 hover:bg-blue-700 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+            <a
+                href="https://manst1.github.io/Memory/memory.html"
+                class="group bg-blue-600 hover:bg-blue-700 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
                 <div class="flex flex-col items-center">
                     <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 10c-3.313 0-6-2.687-6-6s2.687-6 6-6 6 2.687 6 6-2.687 6-6 6z"></path>
@@ -160,9 +382,12 @@
                 </div>
             </a>
 
+
             <!-- Cosmos -->
-            <a href="https://manst1.github.io/Cosmos/cosmos.html" 
-               class="group bg-purple-600 hover:bg-purple-700 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+            <a
+                href="https://manst1.github.io/Cosmos/cosmos.html"
+                class="group bg-purple-600 hover:bg-purple-700 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
                 <div class="flex flex-col items-center">
                     <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18M3 21h18M12 3v18M3 12h18"></path>
@@ -171,9 +396,12 @@
                 </div>
             </a>
 
+
             <!-- Snake -->
-            <a href="https://manst1.github.io/Snake/snake.html" 
-               class="group bg-green-600 hover:bg-green-700 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+            <a
+                href="https://manst1.github.io/Snake/snake.html"
+                class="group bg-green-600 hover:bg-green-700 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
                 <div class="flex flex-col items-center">
                     <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14c-1.5 0-3-2-3-4s1.5-4 3-4 3 2 3 4-1.5 4-3 4zm-7 6c-1.5 0-3-2-3-4s1.5-4 3-4 3 2 3 4-1.5 4-3 4zm-7-6c-1.5 0-3-2-3-4s1.5-4 3-4 3 2 3 4-1.5 4-3 4z"></path>
@@ -182,9 +410,12 @@
                 </div>
             </a>
 
+
             <!-- Forge -->
-            <a href="https://manst1.github.io/Forge/forge.html" 
-               class="group bg-red-600 hover:bg-red-700 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+            <a
+                href="https://manst1.github.io/Forge/forge.html"
+                class="group bg-red-600 hover:bg-red-700 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
                 <div class="flex flex-col items-center">
                     <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3h2v6h6v2h-6v6h-2v-6H5V9h6V3z"></path>
@@ -193,9 +424,12 @@
                 </div>
             </a>
 
+
             <!-- Hangman -->
-            <a href="https://manst1.github.io/Hangman/hangman.html" 
-               class="group bg-gray-700 hover:bg-gray-800 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+            <a
+                href="https://manst1.github.io/Hangman/hangman.html"
+                class="group bg-gray-700 hover:bg-gray-800 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
                 <div class="flex flex-col items-center">
                     <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 3h12M6 3v18M6 21h6M12 21v-6a2 2 0 012-2h4"></path>
@@ -204,9 +438,12 @@
                 </div>
             </a>
 
+
             <!-- Tint -->
-            <a href="https://manst1.github.io/Tint/tint.html" 
-               class="group bg-orange-600 hover:bg-orange-700 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+            <a
+                href="https://manst1.github.io/Tint/tint.html"
+                class="group bg-orange-600 hover:bg-orange-700 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
                 <div class="flex flex-col items-center">
                     <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3c-2.5 3-5 5-5 9a5 5 0 0010 0c0-4-2.5-6-5-9z"/>
@@ -215,9 +452,12 @@
                 </div>
             </a>
 
+
             <!-- Yield -->
-            <a href="https://manst1.github.io/Yield/yield.html" 
-               class="group bg-amber-800 hover:bg-amber-900 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+            <a
+                href="https://manst1.github.io/Yield/yield.html"
+                class="group bg-amber-800 hover:bg-amber-900 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
                 <div class="flex flex-col items-center">
                     <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a4 4 0 014 4v12a4 4 0 01-8 0V6a4 4 0 014-4zm0 4v12M8 10h8"/>
@@ -226,9 +466,12 @@
                 </div>
             </a>
 
+
             <!-- Color Catcher -->
-            <a href="https://manst1.github.io/ColorCatcher/catcher.html" 
-               class="group bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+            <a
+                href="https://manst1.github.io/ColorCatcher/catcher.html"
+                class="group bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
                 <div class="flex flex-col items-center">
                     <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3a2 2 0 012 2v14a2 2 0 01-2 2H9a2 2 0 01-2-2V5a2 2 0 012-2h6zm-3 14h.01M9 7h6m-6 4h6m-6 4h6"></path>
@@ -239,8 +482,10 @@
 
 
             <!-- Echo -->
-            <a href="https://manst1.github.io/Echo/echo.html" 
-               class="group bg-green-900 hover:bg-green-900 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+            <a
+                href="https://manst1.github.io/Echo/echo.html"
+                class="group bg-green-900 hover:bg-green-900 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
                 <div class="flex flex-col items-center">
                     <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12M6 12h12M10 8v8M14 8v8"/>
@@ -249,9 +494,12 @@
                 </div>
             </a>
 
+
             <!-- PathPulse -->
-            <a href="https://manst1.github.io/PathPulse/pathpulse.html" 
-               class="group bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+            <a
+                href="https://manst1.github.io/PathPulse/pathpulse.html"
+                class="group bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
                 <div class="flex flex-col items-center">
                     <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h3l3 8 4-16 3 8h4"></path>
@@ -260,9 +508,12 @@
                 </div>
             </a>
 
+
             <!-- Dash -->
-            <a href="https://manst1.github.io/Dash/dash.html" 
-			   class="group bg-red-400 hover:bg-red-500 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+            <a
+                href="https://manst1.github.io/Dash/dash.html"
+                class="group bg-red-400 hover:bg-red-500 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
                 <div class="flex flex-col items-center">
                     <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
@@ -271,9 +522,12 @@
                 </div>
             </a>
 
+
             <!-- Tic Tac Toe -->
-            <a href="https://manst1.github.io/TicTacToe/tictactoe.html" 
-               class="group bg-teal-600 hover:bg-teal-700 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+            <a
+                href="https://manst1.github.io/TicTacToe/tictactoe.html"
+                class="group bg-teal-600 hover:bg-teal-700 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
                 <div class="flex flex-col items-center">
                     <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8h18M3 16h18M8 3v18M16 3v18"/>
@@ -282,32 +536,52 @@
                 </div>
             </a>
 
+
             <!-- Trax -->
-            <a href="https://manst1.github.io/Trax/Trax.html" 
-               class="group bg-pink-800 hover:bg-pink-900 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+            <a
+                href="https://manst1.github.io/Trax/Trax.html"
+                class="group bg-pink-700 hover:bg-pink-800 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
                 <div class="flex flex-col items-center">
-                    <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3l9 15.6H3L12 3zm0 6l4 6.9H8L12 9z"/>
                     </svg>
                     <span class="text-xl md:text-2xl">Trax</span>
                 </div>
             </a>
 
+
             <!-- Schnapsen -->
-            <a href="https://manst1.github.io/Schnapsen/schnapsen.html" 
-               class="group bg-gray-500 hover:bg-gray-600 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+            <a
+                href="https://manst1.github.io/Schnapsen/schnapsen.html"
+                class="group bg-gray-500 hover:bg-gray-600 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
                 <div class="flex flex-col items-center">
-                    <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #ffffff;">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                    <svg
+                        class="w-16 h-16 mb-3 group-hover:animate-pulse"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        style="color: #ffffff;"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                        />
                     </svg>
+
                     <span class="text-xl md:text-2xl">Schnapsen</span>
                 </div>
             </a>
 
+
             <!-- Gamble -->
-            <a href="https://manst1.github.io/Gamble/gamble.html" 
-               class="group bg-blue-400 hover:bg-blue-500 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
+            <a
+                href="https://manst1.github.io/Gamble/gamble.html"
+                class="group bg-blue-400 hover:bg-blue-500 text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
                 <div class="flex flex-col items-center">
                     <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7H14a3.5 3.5 0 010 7H6"/>
@@ -315,430 +589,960 @@
                     <span class="text-xl md:text-2xl">Gamble</span>
                 </div>
             </a>
-			
-<a href="https://manst1.github.io/Nexon/nexon.html" 
-   class="group bg-[#3A1F4F] hover:bg-[#2F183F] text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
-    <div class="flex flex-col items-center">
-        <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2l9 6v8l-9 6-9-6V8l9-6zm0 3l-6 4v6l6 4 6-4V9l-6-4z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 10h10M6 13.5h12"/>
-        </svg>
-        <span class="text-xl md:text-2xl">Nexon</span>
-    </div>
-</a>
 
 
-			
-<!-- Spike -->
-<a href="https://manst1.github.io/Spike/spike.html" 
-   class="group bg-[#351E00] hover:bg-[#291600] text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
-    <div class="flex flex-col items-center">
-        <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" 
-             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- Nexon -->
+            <a
+                href="https://manst1.github.io/Nexon/nexon.html"
+                class="group bg-[#3A1F4F] hover:bg-[#2F183F] text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
+                <div class="flex flex-col items-center">
+                    <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2l9 6v8l-9 6-9-6V8l9-6zm0 3l-6 4v6l6 4 6-4V9l-6-4z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 10h10M6 13.5h12"/>
+                    </svg>
 
-            <!-- Base line -->
-            <line x1="3" y1="20" x2="21" y2="20" stroke-width="2" stroke-linecap="round"/>
-
-            <!-- Left spike -->
-            <polygon points="5,20 7.5,10 10,20" stroke-width="2" stroke-linejoin="round"/>
-
-            <!-- Center spike (tallest) -->
-            <polygon points="10,20 12,5 14,20" stroke-width="2" stroke-linejoin="round"/>
-
-            <!-- Right spike -->
-            <polygon points="14,20 16.5,10 19,20" stroke-width="2" stroke-linejoin="round"/>
-
-        </svg>
-        <span class="text-xl md:text-2xl">Spike</span>
-    </div>
-</a>
-
-<!-- KeyRush -->
-<a href="https://manst1.github.io/KeyRush/index.html" 
-   class="group bg-[#E8A06A] hover:bg-[#D98C56] text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
-    <div class="flex flex-col items-center">
-        <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <circle cx="7" cy="12" r="4" stroke-width="2"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 12h10M17 12v3M20 12v2"/>
-            <circle cx="7" cy="12" r="1.5" fill="currentColor"/>
-        </svg>
-        <span class="text-xl md:text-2xl">Key Rush</span>
-    </div>
-</a>
-
-<!-- Penalty -->
-<a href="https://manst1.github.io/Penalty/index.html" 
-   class="group bg-[#1E7A3A] hover:bg-[#186330] text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black">
-    <div class="flex flex-col items-center">
-        <svg class="w-16 h-16 mb-3 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <polygon
-                points="12,4 18,7.5 18,14.5 12,18 6,14.5 6,7.5"
-                stroke-width="2"
-                stroke-linejoin="round"
-            />
-        </svg>
-        <span class="text-xl md:text-2xl">Penalty</span>
-    </div>
-</a>
+                    <span class="text-xl md:text-2xl">Nexon</span>
+                </div>
+            </a>
 
 
-		
+            <!-- Spike -->
+            <a
+                href="https://manst1.github.io/Spike/spike.html"
+                class="group bg-[#3D2405] hover:bg-[#321C02] text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
+                <div class="flex flex-col items-center">
+
+                    <svg
+                        class="w-16 h-16 mb-3 group-hover:animate-pulse"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <line
+                            x1="3"
+                            y1="20"
+                            x2="21"
+                            y2="20"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                        />
+
+                        <polygon
+                            points="5,20 7.5,10 10,20"
+                            stroke-width="2"
+                            stroke-linejoin="round"
+                        />
+
+                        <polygon
+                            points="10,20 12,5 14,20"
+                            stroke-width="2"
+                            stroke-linejoin="round"
+                        />
+
+                        <polygon
+                            points="14,20 16.5,10 19,20"
+                            stroke-width="2"
+                            stroke-linejoin="round"
+                        />
+                    </svg>
+
+                    <span class="text-xl md:text-2xl">Spike</span>
+                </div>
+            </a>
+
+
+            <!-- KeyRush -->
+            <a
+                href="https://manst1.github.io/KeyRush/index.html"
+                class="group bg-[#8F2525] hover:bg-[#751D1D] text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
+                <div class="flex flex-col items-center">
+
+                    <svg
+                        class="w-16 h-16 mb-3 group-hover:animate-pulse"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle cx="7" cy="12" r="4" stroke-width="2"/>
+
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M11 12h10M17 12v3M20 12v2"
+                        />
+
+                        <circle cx="7" cy="12" r="1.5" fill="currentColor"/>
+                    </svg>
+
+                    <span class="text-xl md:text-2xl">Key Rush</span>
+                </div>
+            </a>
+
+
+            <!-- Penalty -->
+            <a
+                href="https://manst1.github.io/Penalty/index.html"
+                class="group bg-[#1E7A3A] hover:bg-[#186330] text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
+                <div class="flex flex-col items-center">
+
+                    <svg
+                        class="w-16 h-16 mb-3 group-hover:animate-pulse"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <polygon
+                            points="12,4 18,7.5 18,14.5 12,18 6,14.5 6,7.5"
+                            stroke-width="2"
+                            stroke-linejoin="round"
+                        />
+                    </svg>
+
+                    <span class="text-xl md:text-2xl">Penalty</span>
+                </div>
+            </a>
+
+
+            <!-- Air Ltd. -->
+            <a
+                href="https://manst1.github.io/AirLtd/airltd.html"
+                class="group bg-[#C98245] hover:bg-[#B56F38] text-white font-semibold py-8 px-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 border-4 border-black"
+            >
+                <div class="flex flex-col items-center">
+
+                    <svg
+                        class="w-16 h-16 mb-3 group-hover:animate-pulse"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="
+                            M12 2
+                            C11.4 2 11 2.6 11 3.4
+                            V9
+                            L4 13
+                            V15
+                            L11 13
+                            V18
+                            L8.5 20
+                            V21.5
+                            L12 20.5
+                            L15.5 21.5
+                            V20
+                            L13 18
+                            V13
+                            L20 15
+                            V13
+                            L13 9
+                            V3.4
+                            C13 2.6 12.6 2 12 2Z
+                        "/>
+                    </svg>
+
+                    <span class="text-xl md:text-2xl">Air Ltd.</span>
+                </div>
+            </a>
+
         </div>
     </div>
 
-<script>
-    const body = document.getElementById('body');
-    const headerText = document.getElementById('headerText');
-    const colorPicker1 = document.getElementById('bgColorPicker1');
-    const colorPicker2 = document.getElementById('bgColorPicker2');
-    const patternSelect = document.getElementById('patternSelect');
-    const colorPickerButton = document.getElementById('colorPickerButton');
-    const colorPickerDropdown = document.getElementById('colorPickerDropdown');
-    const closeColorPicker = document.getElementById('closeColorPicker');
-    const miniGameButton = document.getElementById('miniGameButton');
-    const patternPreviews = document.querySelectorAll('.pattern-preview');
 
-    const isMobile = window.matchMedia("(max-width: 640px)").matches || 'ontouchstart' in window;
+    </div><!-- /#pageWorld -->
 
-    let activeMiniGame = null;
+    <script>
+        const body = document.getElementById('body');
+        const headerText = document.getElementById('headerText');
 
-    const miniGames = ['dark', 'red', 'bounce', 'random', 'upside'];
+        const colorPicker1 = document.getElementById('bgColorPicker1');
+        const colorPicker2 = document.getElementById('bgColorPicker2');
 
-    function clearMiniGame() {
-        document.querySelectorAll('.mini-game-layer, .mini-game-ball, .mini-game-note').forEach(el => el.remove());
-        document.body.style.cursor = '';
-        document.body.style.transform = '';
-        document.body.style.transformOrigin = '';
-        if (activeMiniGame?.cleanup) activeMiniGame.cleanup();
-        activeMiniGame = null;
-    }
+        const patternSelect = document.getElementById('patternSelect');
 
-    function startRandomMiniGame() {
-        const pick = miniGames[Math.floor(Math.random() * miniGames.length)];
-        startMiniGame(pick);
-    }
+        const colorPickerButton =
+            document.getElementById('colorPickerButton');
 
-    function startMiniGame(game) {
-        clearMiniGame();
-        if (game === 'dark') startDarkMiniGame();
-        if (game === 'red') startRedMiniGame();
-        if (game === 'bounce') startBounceMiniGame();
-        if (game === 'random') openRandomGame();
-        if (game === 'upside') startUpsideDown();
-    }
+        const colorPickerDropdown =
+            document.getElementById('colorPickerDropdown');
 
-    function startDarkMiniGame() {
-        const layer = document.createElement('div');
-        layer.className = 'mini-game-layer';
-        layer.style.cssText = 'position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:9999;transition:opacity 20s linear;';
-        document.body.appendChild(layer);
-        requestAnimationFrame(() => { layer.style.opacity = '1'; });
+        const closeColorPicker =
+            document.getElementById('closeColorPicker');
 
-        const closeTimer = setTimeout(() => {
-            window.close();
-            document.body.innerHTML = '';
-            document.body.style.background = '#000';
-        }, 20500);
+        const colorPickerContainer =
+            document.getElementById('colorPickerContainer');
 
-        activeMiniGame = { cleanup: () => clearTimeout(closeTimer) };
-    }
+        const patternPreviews =
+            document.querySelectorAll('.pattern-preview');
 
-    function startRedMiniGame() {
-        const canvas = document.createElement('canvas');
-        canvas.className = 'mini-game-layer';
-        canvas.style.cssText = 'position:fixed;inset:0;z-index:9998;touch-action:none;cursor:none;';
-        document.body.appendChild(canvas);
-        const ctx = canvas.getContext('2d');
 
-        let width, height, animationFrame, spreadTimer;
-        const blobs = [];
-        let brushX = -100;
-        let brushY = -100;
+        function setContrastTextColor(bgColor) {
 
-        const brush = document.createElement('div');
-        brush.className = 'mini-game-layer';
-        brush.style.cssText = 'position:fixed;width:70px;height:70px;border:4px solid white;border-radius:50%;box-shadow:0 0 0 2px #222;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
-        document.body.appendChild(brush);
+            const hex = bgColor.replace('#', '');
 
-        const note = document.createElement('div');
-        note.className = 'mini-game-note';
-        note.textContent = 'Brush the red away!';
-        note.style.cssText = 'position:fixed;left:50%;top:20px;transform:translateX(-50%);z-index:10000;background:white;color:#991b1b;font-weight:bold;padding:10px 14px;border-radius:12px;box-shadow:0 4px 16px #0004;';
-        document.body.appendChild(note);
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
 
-        function resizeCanvas() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
+            const luminance =
+                (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+            const textColor =
+                luminance < 0.5 ? '#ffffff' : '#000000';
+
+            const strokeColor =
+                luminance < 0.5 ? '#000000' : '#ffffff';
+
+            headerText.style.color = textColor;
+            headerText.style.webkitTextStrokeColor = strokeColor;
         }
 
-        function addBlob() {
-            blobs.push({
-                x: Math.random() * width,
-                y: Math.random() * height,
-                r: 12 + Math.random() * 20,
-                grow: 0.7 + Math.random() * 1.2
+
+        function updateBackground(save = true) {
+
+            const color1 = colorPicker1.value;
+            const color2 = colorPicker2.value;
+            const pattern = patternSelect.value;
+
+
+            patternPreviews.forEach(preview => {
+
+                const patternType =
+                    preview.getAttribute('data-pattern');
+
+                switch (patternType) {
+
+                    case 'solid':
+
+                        preview.style.background = color1;
+
+                        break;
+
+
+                    case 'gradient':
+
+                        preview.style.background =
+                            `linear-gradient(135deg, ${color1}, ${color2})`;
+
+                        break;
+
+
+                    case 'geometric':
+
+                        preview.style.background =
+                            `repeating-linear-gradient(
+                                45deg,
+                                ${color1},
+                                ${color1} 10px,
+                                ${color2} 10px,
+                                ${color2} 20px
+                            )`;
+
+                        break;
+
+
+                    case 'dots':
+
+                        preview.style.background = `
+                            radial-gradient(
+                                circle at 25% 25%,
+                                ${color2} 2px,
+                                transparent 2px
+                            ),
+                            radial-gradient(
+                                circle at 75% 75%,
+                                ${color2} 2px,
+                                transparent 2px
+                            )
+                        `;
+
+                        preview.style.backgroundColor = color1;
+                        preview.style.backgroundSize = '20px 20px';
+
+                        break;
+
+
+                    case 'triangles':
+
+                        preview.style.background = `
+                            linear-gradient(
+                                45deg,
+                                ${color2} 25%,
+                                transparent 25%,
+                                transparent 75%,
+                                ${color2} 75%
+                            ) 0 0/20px 20px,
+
+                            linear-gradient(
+                                -45deg,
+                                ${color2} 25%,
+                                transparent 25%,
+                                transparent 75%,
+                                ${color2} 75%
+                            ) 0 0/20px 20px
+                        `;
+
+                        preview.style.backgroundColor = color1;
+
+                        break;
+
+
+                    case 'confetti':
+
+                        preview.style.background = `
+                            radial-gradient(
+                                circle at 20% 30%,
+                                ${color2} 2px,
+                                transparent 2px
+                            ),
+                            radial-gradient(
+                                circle at 80% 70%,
+                                ${color2} 2px,
+                                transparent 2px
+                            ),
+                            radial-gradient(
+                                circle at 40% 20%,
+                                ${color2} 1px,
+                                transparent 1px
+                            ),
+                            radial-gradient(
+                                circle at 65% 35%,
+                                ${color2} 1px,
+                                transparent 1px
+                            )
+                        `;
+
+                        preview.style.backgroundColor = color1;
+                        preview.style.backgroundSize = '50px 50px';
+
+                        break;
+                }
             });
-        }
 
-        function draw() {
-            ctx.clearRect(0, 0, width, height);
-            ctx.fillStyle = 'rgba(190, 0, 0, 0.88)';
-            blobs.forEach(blob => {
-                blob.r += blob.grow;
-                ctx.beginPath();
-                ctx.arc(blob.x, blob.y, blob.r, 0, Math.PI * 2);
-                ctx.fill();
-            });
 
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.beginPath();
-            ctx.arc(brushX, brushY, 48, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalCompositeOperation = 'source-over';
+            switch (pattern) {
 
-            animationFrame = requestAnimationFrame(draw);
-        }
+                case 'solid':
 
-        function moveBrush(x, y) {
-            brushX = x;
-            brushY = y;
-            brush.style.left = x + 'px';
-            brush.style.top = y + 'px';
-        }
+                    body.style.background = color1;
 
-        const mouseMove = e => moveBrush(e.clientX, e.clientY);
-        const touchMove = e => {
-            e.preventDefault();
-            const t = e.touches[0];
-            if (t) moveBrush(t.clientX, t.clientY);
-        };
+                    break;
 
-        resizeCanvas();
-        for (let i = 0; i < 7; i++) addBlob();
-        spreadTimer = setInterval(addBlob, 650);
-        window.addEventListener('resize', resizeCanvas);
-        window.addEventListener('mousemove', mouseMove);
-        window.addEventListener('touchmove', touchMove, { passive: false });
-        draw();
 
-        activeMiniGame = { cleanup: () => {
-            cancelAnimationFrame(animationFrame);
-            clearInterval(spreadTimer);
-            window.removeEventListener('resize', resizeCanvas);
-            window.removeEventListener('mousemove', mouseMove);
-            window.removeEventListener('touchmove', touchMove);
-        }};
-    }
+                case 'gradient':
 
-    function startBounceMiniGame() {
-        const ball = document.createElement('div');
-        ball.className = 'mini-game-ball';
-        ball.style.cssText = 'position:fixed;left:50%;top:50%;width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #fff, #38bdf8 35%, #1d4ed8);z-index:9999;box-shadow:0 8px 20px #0006;cursor:pointer;';
-        document.body.appendChild(ball);
+                    body.style.background =
+                        `linear-gradient(135deg, ${color1}, ${color2})`;
 
-        let x = window.innerWidth / 2;
-        let y = window.innerHeight / 2;
-        let vx = 5;
-        let vy = 4;
-        let animationFrame;
+                    break;
 
-        function randomKick() {
-            const speed = 9;
-            const angle = Math.random() * Math.PI * 2;
-            vx = Math.cos(angle) * speed;
-            vy = Math.sin(angle) * speed;
-        }
 
-        function move() {
-            x += vx;
-            y += vy;
-            const size = 46;
-            if (x <= 0 || x + size >= window.innerWidth) vx *= -1;
-            if (y <= 0 || y + size >= window.innerHeight) vy *= -1;
-            x = Math.max(0, Math.min(window.innerWidth - size, x));
-            y = Math.max(0, Math.min(window.innerHeight - size, y));
-            ball.style.left = x + 'px';
-            ball.style.top = y + 'px';
-            animationFrame = requestAnimationFrame(move);
-        }
+                case 'geometric':
 
-        ball.addEventListener('click', randomKick);
-        ball.addEventListener('touchstart', randomKick);
-        move();
+                    body.style.background =
+                        `repeating-linear-gradient(
+                            45deg,
+                            ${color1},
+                            ${color1} 10px,
+                            ${color2} 10px,
+                            ${color2} 20px
+                        )`;
 
-        activeMiniGame = { cleanup: () => cancelAnimationFrame(animationFrame) };
-    }
+                    break;
 
-    function openRandomGame() {
-        const links = Array.from(document.querySelectorAll('a[href]')).map(a => a.href).filter(href => href.includes('manst1.github.io'));
-        const randomLink = links[Math.floor(Math.random() * links.length)];
-        if (randomLink) window.open(randomLink, '_blank');
-    }
 
-    function startUpsideDown() {
-        document.body.style.transform = 'rotate(180deg)';
-        document.body.style.transformOrigin = 'center center';
-        activeMiniGame = { cleanup: () => {} };
-    }
+                case 'dots':
 
-    miniGameButton.addEventListener('click', startRandomMiniGame);
+                    body.style.background = `
+                        radial-gradient(
+                            circle at 25% 25%,
+                            ${color2} 2px,
+                            transparent 2px
+                        ),
+                        radial-gradient(
+                            circle at 75% 75%,
+                            ${color2} 2px,
+                            transparent 2px
+                        )
+                    `;
 
-    let cheatBuffer = '';
-    document.addEventListener('keydown', (e) => {
-        if (e.key.length !== 1) return;
-        cheatBuffer = (cheatBuffer + e.key.toLowerCase()).slice(-20);
-        for (const game of miniGames) {
-            if (cheatBuffer.endsWith(game)) {
-                startMiniGame(game);
-                cheatBuffer = '';
-                break;
+                    body.style.backgroundColor = color1;
+                    body.style.backgroundSize = '40px 40px';
+
+                    break;
+
+
+                case 'triangles':
+
+                    body.style.background = `
+                        linear-gradient(
+                            45deg,
+                            ${color2} 25%,
+                            transparent 25%,
+                            transparent 75%,
+                            ${color2} 75%
+                        ) 0 0/40px 40px,
+
+                        linear-gradient(
+                            -45deg,
+                            ${color2} 25%,
+                            transparent 25%,
+                            transparent 75%,
+                            ${color2} 75%
+                        ) 0 0/40px 40px
+                    `;
+
+                    body.style.backgroundColor = color1;
+
+                    break;
+
+
+                case 'confetti':
+
+                    body.style.background = `
+                        radial-gradient(
+                            circle at 20% 30%,
+                            ${color2} 2px,
+                            transparent 2px
+                        ),
+                        radial-gradient(
+                            circle at 80% 70%,
+                            ${color2} 2px,
+                            transparent 2px
+                        ),
+                        radial-gradient(
+                            circle at 40% 20%,
+                            ${color2} 1px,
+                            transparent 1px
+                        ),
+                        radial-gradient(
+                            circle at 65% 35%,
+                            ${color2} 1px,
+                            transparent 1px
+                        ),
+                        radial-gradient(
+                            circle at 35% 65%,
+                            ${color2} 1.5px,
+                            transparent 1.5px
+                        ),
+                        radial-gradient(
+                            circle at 85% 40%,
+                            ${color2} 1.5px,
+                            transparent 1.5px
+                        )
+                    `;
+
+                    body.style.backgroundColor = color1;
+                    body.style.backgroundSize = '60px 60px';
+
+                    break;
+
+
+                default:
+
+                    body.style.background = color1;
+            }
+
+
+            setContrastTextColor(color1);
+
+
+            if (save) {
+
+                localStorage.setItem(
+                    'bgSettings',
+                    JSON.stringify({
+                        color1,
+                        color2,
+                        pattern
+                    })
+                );
             }
         }
-    });
 
-    function setContrastTextColor(bgColor) {
-        const hex = bgColor.replace('#', '');
-        const r = parseInt(hex.substring(0, 2), 16);
-        const g = parseInt(hex.substring(2, 4), 16);
-        const b = parseInt(hex.substring(4, 6), 16);
-        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-        const textColor = luminance < 0.5 ? '#ffffff' : '#000000';
-        const strokeColor = luminance < 0.5 ? '#000000' : '#ffffff';
-        headerText.style.color = textColor;
-        headerText.style.webkitTextStrokeColor = strokeColor;
-    }
 
-    function updateBackground(save = true) {
-        const color1 = colorPicker1.value;
-        const color2 = colorPicker2.value;
-        const pattern = patternSelect.value;
+        const savedSettings =
+            JSON.parse(localStorage.getItem('bgSettings'));
+
+
+        if (savedSettings) {
+
+            colorPicker1.value =
+                savedSettings.color1 || '#1e293b';
+
+            colorPicker2.value =
+                savedSettings.color2 || '#1e40af';
+
+            patternSelect.value =
+                savedSettings.pattern || 'gradient';
+
+            updateBackground(false);
+
+        } else {
+
+            updateBackground(false);
+        }
+
+
+        colorPickerButton.addEventListener('click', () => {
+
+            colorPickerDropdown.classList.toggle('hidden');
+
+        });
+
+
+        closeColorPicker.addEventListener('click', () => {
+
+            colorPickerDropdown.classList.add('hidden');
+
+        });
+
+
+        document.addEventListener('click', (e) => {
+
+            if (!colorPickerContainer.contains(e.target)) {
+
+                colorPickerDropdown.classList.add('hidden');
+
+            }
+        });
+
 
         patternPreviews.forEach(preview => {
-            const patternType = preview.getAttribute('data-pattern');
-            switch (patternType) {
-                case 'solid':
-                    preview.style.background = color1;
-                    break;
-                case 'gradient':
-                    preview.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
-                    break;
-                case 'geometric':
-                    preview.style.background = `repeating-linear-gradient(45deg, ${color1}, ${color1} 10px, ${color2} 10px, ${color2} 20px)`;
-                    break;
-                case 'dots':
-                    preview.style.background = `
-                        radial-gradient(circle at 25% 25%, ${color2} 2px, transparent 2px),
-                        radial-gradient(circle at 75% 75%, ${color2} 2px, transparent 2px)
-                    `;
-                    preview.style.backgroundColor = color1;
-                    preview.style.backgroundSize = '20px 20px';
-                    break;
-                case 'triangles':
-                    preview.style.background = `
-                        linear-gradient(45deg, ${color2} 25%, transparent 25%, transparent 75%, ${color2} 75%) 0 0/20px 20px,
-                        linear-gradient(-45deg, ${color2} 25%, transparent 25%, transparent 75%, ${color2} 75%) 0 0/20px 20px
-                    `;
-                    preview.style.backgroundColor = color1;
-                    break;
-                case 'confetti':
-                    preview.style.background = `
-                        radial-gradient(circle at 20% 30%, ${color2} 2px, transparent 2px),
-                        radial-gradient(circle at 80% 70%, ${color2} 2px, transparent 2px),
-                        radial-gradient(circle at 40% 20%, ${color2} 1px, transparent 1px),
-                        radial-gradient(circle at 65% 35%, ${color2} 1px, transparent 1px)
-                    `;
-                    preview.style.backgroundColor = color1;
-                    preview.style.backgroundSize = '50px 50px';
-                    break;
+
+            preview.addEventListener('click', () => {
+
+                const pattern =
+                    preview.getAttribute('data-pattern');
+
+                patternSelect.value = pattern;
+
+                updateBackground();
+            });
+        });
+
+
+        colorPicker1.addEventListener(
+            'input',
+            updateBackground
+        );
+
+        colorPicker2.addEventListener(
+            'input',
+            updateBackground
+        );
+
+        patternSelect.addEventListener(
+            'change',
+            updateBackground
+        );
+		
+
+
+
+        /* ============================================================
+           RANDOM EVENT SYSTEM
+           Every click chooses one of eight events.
+           Effects are cumulative unless the event itself is a toggle.
+           ============================================================ */
+
+        const chaosButton = document.getElementById('chaosButton');
+        const chaosButtonImage = document.getElementById('chaosButtonImage');
+        const pageWorld = document.getElementById('pageWorld');
+        const gameGrid = document.getElementById('gameGrid');
+
+        const chaosImages = [
+            'https://i.imgur.com/9YjVx84.png',
+            'https://i.imgur.com/0d1SU41.png',
+            'https://i.imgur.com/xqCaI7t.png'
+        ];
+
+        const songs = [
+            'Pitbull - I Know You Want Me (Calle Ocho).mp3',
+            'Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster).mp3',
+            'S.T.S. - Fürstenfeld.mp3',
+            'Änglahund.mp3'
+        ];
+
+        let pageRotation = 0;
+        let chineseMode = false;
+        const activeAudios = [];
+        const balls = [];
+
+        function randomItem(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        /* Event 1: open a random game in a new tab/window */
+        function openRandomGame() {
+            const games = [...gameGrid.querySelectorAll('a[href]')];
+            if (!games.length) return;
+            const game = randomItem(games);
+            window.open(game.href, '_blank', 'noopener,noreferrer');
+        }
+
+        /* Event 2: play one random MP3 from the same repository/folder */
+        function playRandomSong() {
+            const filename = randomItem(songs);
+            const audio = new Audio(encodeURI('./' + filename));
+            audio.volume = 0.82;
+            activeAudios.push(audio);
+            audio.addEventListener('ended', () => {
+                const index = activeAudios.indexOf(audio);
+                if (index !== -1) activeAudios.splice(index, 1);
+            });
+            audio.play().catch(err => console.warn('Audio could not be played:', err));
+        }
+
+        /* Event 3: one permanent bouncing, draggable ball */
+        function spawnBall() {
+            const el = document.createElement('div');
+            el.className = 'chaos-ball';
+            el.setAttribute('aria-label', 'Bouncing ball');
+            document.body.appendChild(el);
+
+            const size = 42;
+            const normalSpeed = 185; // pixels per second
+            const angle = Math.random() * Math.PI * 2;
+            const ball = {
+                el,
+                size,
+                x: Math.random() * Math.max(1, innerWidth - size),
+                y: Math.random() * Math.max(1, innerHeight - size),
+                vx: Math.cos(angle) * normalSpeed,
+                vy: Math.sin(angle) * normalSpeed,
+                normalSpeed,
+                boostUntil: 0,
+                dragging: false,
+                dragMoved: false,
+                pointerId: null,
+                lastPointerX: 0,
+                lastPointerY: 0
+            };
+
+            balls.push(ball);
+            el.style.transform = `translate(${ball.x}px, ${ball.y}px)`;
+
+            el.addEventListener('pointerdown', e => {
+                ball.dragging = true;
+                ball.dragMoved = false;
+                ball.pointerId = e.pointerId;
+                ball.lastPointerX = e.clientX;
+                ball.lastPointerY = e.clientY;
+                el.setPointerCapture(e.pointerId);
+                e.preventDefault();
+            });
+
+            el.addEventListener('pointermove', e => {
+                if (!ball.dragging || e.pointerId !== ball.pointerId) return;
+                const dx = e.clientX - ball.lastPointerX;
+                const dy = e.clientY - ball.lastPointerY;
+                if (Math.abs(dx) + Math.abs(dy) > 2) ball.dragMoved = true;
+                ball.x = Math.min(Math.max(0, ball.x + dx), innerWidth - ball.size);
+                ball.y = Math.min(Math.max(0, ball.y + dy), innerHeight - ball.size);
+                ball.lastPointerX = e.clientX;
+                ball.lastPointerY = e.clientY;
+                el.style.transform = `translate(${ball.x}px, ${ball.y}px)`;
+            });
+
+            function releaseBall(e) {
+                if (!ball.dragging || e.pointerId !== ball.pointerId) return;
+                ball.dragging = false;
+                try { el.releasePointerCapture(e.pointerId); } catch (_) {}
+
+                // A click/tap (not a drag) gives it a brief random-direction speed boost.
+                if (!ball.dragMoved) {
+                    const a = Math.random() * Math.PI * 2;
+                    const boostedSpeed = ball.normalSpeed * 3.2;
+                    ball.vx = Math.cos(a) * boostedSpeed;
+                    ball.vy = Math.sin(a) * boostedSpeed;
+                    ball.boostUntil = performance.now() + 650;
+                }
             }
+
+            el.addEventListener('pointerup', releaseBall);
+            el.addEventListener('pointercancel', releaseBall);
+        }
+
+        let lastBallFrame = performance.now();
+        function animateBalls(now) {
+            const dt = Math.min((now - lastBallFrame) / 1000, 0.04);
+            lastBallFrame = now;
+
+            balls.forEach(ball => {
+                if (ball.dragging) return;
+
+                // After a boost, return to normal speed while keeping the direction.
+                if (ball.boostUntil && now >= ball.boostUntil) {
+                    const current = Math.hypot(ball.vx, ball.vy) || 1;
+                    ball.vx = ball.vx / current * ball.normalSpeed;
+                    ball.vy = ball.vy / current * ball.normalSpeed;
+                    ball.boostUntil = 0;
+                }
+
+                ball.x += ball.vx * dt;
+                ball.y += ball.vy * dt;
+
+                const maxX = Math.max(0, innerWidth - ball.size);
+                const maxY = Math.max(0, innerHeight - ball.size);
+
+                if (ball.x <= 0) {
+                    ball.x = 0;
+                    ball.vx = Math.abs(ball.vx);
+                } else if (ball.x >= maxX) {
+                    ball.x = maxX;
+                    ball.vx = -Math.abs(ball.vx);
+                }
+
+                if (ball.y <= 0) {
+                    ball.y = 0;
+                    ball.vy = Math.abs(ball.vy);
+                } else if (ball.y >= maxY) {
+                    ball.y = maxY;
+                    ball.vy = -Math.abs(ball.vy);
+                }
+
+                ball.el.style.transform = `translate(${ball.x}px, ${ball.y}px)`;
+            });
+
+            requestAnimationFrame(animateBalls);
+        }
+        requestAnimationFrame(animateBalls);
+
+        /* Event 4: add another 180° rotation */
+        function flipPage() {
+            pageRotation += 180;
+            pageWorld.style.transform = `rotate(${pageRotation}deg)`;
+        }
+
+        /* Event 5: Fisher-Yates shuffle of all game cards */
+        function shuffleGames() {
+            const cards = [...gameGrid.children];
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+            cards.forEach(card => gameGrid.appendChild(card));
+        }
+
+        /* Event 6: red paint layer that can be scrubbed away.
+           The canvas itself ignores pointer events, so all games/buttons remain clickable. */
+        function createRedMess() {
+            const canvas = document.createElement('canvas');
+            canvas.className = 'red-mess-layer';
+            document.body.appendChild(canvas);
+
+            const brushCursor = document.createElement('div');
+            brushCursor.className = 'red-brush-cursor';
+            document.body.appendChild(brushCursor);
+
+            const ctx = canvas.getContext('2d');
+            const dpr = Math.max(1, window.devicePixelRatio || 1);
+            const brushRadius = 65;
+            let drawing = false;
+            let last = null;
+
+            function sizeCanvas(firstFill = false) {
+                const w = innerWidth;
+                const h = innerHeight;
+
+                // Preserve what has already been cleaned when the viewport changes size.
+                const old = document.createElement('canvas');
+                old.width = canvas.width;
+                old.height = canvas.height;
+                if (canvas.width && canvas.height) {
+                    old.getContext('2d').drawImage(canvas, 0, 0);
+                }
+
+                canvas.width = Math.round(w * dpr);
+                canvas.height = Math.round(h * dpr);
+                canvas.style.width = w + 'px';
+                canvas.style.height = h + 'px';
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+                if (firstFill || !old.width || !old.height) {
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.fillStyle = '#ef1111';
+                    ctx.fillRect(0, 0, w, h);
+                } else {
+                    ctx.save();
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    ctx.drawImage(old, 0, 0, old.width, old.height, 0, 0, canvas.width, canvas.height);
+                    ctx.restore();
+                }
+            }
+            sizeCanvas(true);
+
+            function erasePoint(x, y) {
+                ctx.save();
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(x, y, brushRadius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            function eraseLine(from, to) {
+                ctx.save();
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.lineWidth = brushRadius * 2;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                ctx.moveTo(from.x, from.y);
+                ctx.lineTo(to.x, to.y);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            function moveBrush(e) {
+                brushCursor.style.display = 'block';
+                brushCursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+            }
+
+            // Listen on the document, NOT the red canvas. Therefore clicks pass through
+            // naturally to the game cards, background menu and chaos button.
+            document.addEventListener('pointerdown', e => {
+                if (e.button !== undefined && e.button !== 0) return;
+                drawing = true;
+                last = { x: e.clientX, y: e.clientY };
+                moveBrush(e);
+                erasePoint(last.x, last.y);
+            }, true);
+
+            document.addEventListener('pointermove', e => {
+                moveBrush(e);
+                if (!drawing) return;
+                const point = { x: e.clientX, y: e.clientY };
+                eraseLine(last, point);
+                last = point;
+            }, true);
+
+            const stopDrawing = () => {
+                drawing = false;
+                last = null;
+            };
+            document.addEventListener('pointerup', stopDrawing, true);
+            document.addEventListener('pointercancel', stopDrawing, true);
+            window.addEventListener('blur', stopDrawing);
+            window.addEventListener('resize', () => sizeCanvas(false));
+        }
+
+        /* Event 7: toggle all visible menu/game words German <-> Mandarin */
+        const translationMap = new Map([
+            ['Manollos Spiele', '马诺洛的游戏'],
+            ['Hintergrund', '背景'],
+            ['Hintergrund anpassen', '调整背景'],
+            ['Erste Farbe:', '第一种颜色：'],
+            ['Zweite Farbe:', '第二种颜色：'],
+            ['Muster:', '图案：'],
+            ['Einfarbig', '纯色'],
+            ['Verlauf', '渐变'],
+            ['Geometrisch', '几何'],
+            ['Punkte', '圆点'],
+            ['Dreiecke', '三角形'],
+            ['Konfetti', '彩纸'],
+            ['Memory', '记忆'],
+            ['Cosmos', '宇宙'],
+            ['Snake', '贪吃蛇'],
+            ['Forge', '锻造'],
+            ['Hangman', '猜词游戏'],
+            ['Tint', '色彩'],
+            ['Yield', '产量'],
+            ['Color Catcher', '颜色捕手'],
+            ['Echo', '回声'],
+            ['PathPulse', '路径脉冲'],
+            ['Dash', '冲刺'],
+            ['Tic Tac Toe', '井字棋'],
+            ['Trax', '轨迹'],
+            ['Schnapsen', '施纳普森'],
+            ['Gamble', '赌博'],
+            ['Nexon', '耐克森'],
+            ['Spike', '尖刺'],
+            ['Key Rush', '按键冲刺'],
+            ['Penalty', '点球'],
+            ['Air Ltd.', '航空有限公司']
+        ]);
+        const reverseTranslationMap = new Map([...translationMap].map(([de, zh]) => [zh, de]));
+
+        function translateTextNodes(root, map) {
+            const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+            const nodes = [];
+            while (walker.nextNode()) nodes.push(walker.currentNode);
+
+            nodes.forEach(node => {
+                const raw = node.nodeValue;
+                const trimmed = raw.trim();
+                if (!trimmed || !map.has(trimmed)) return;
+                node.nodeValue = raw.replace(trimmed, map.get(trimmed));
+            });
+
+            // Select option text needs a direct pass in some browsers.
+            root.querySelectorAll('option').forEach(option => {
+                const t = option.textContent.trim();
+                if (map.has(t)) option.textContent = map.get(t);
+            });
+        }
+
+        function toggleChinese() {
+            chineseMode = !chineseMode;
+            translateTextNodes(pageWorld, chineseMode ? translationMap : reverseTranslationMap);
+            document.documentElement.lang = chineseMode ? 'zh-CN' : 'de';
+            chaosButton.setAttribute('aria-label', chineseMode ? '随机事件' : 'Zufälliges Ereignis');
+        }
+
+        /* Event 8: randomize only the image; its fixed corner position stays unchanged */
+        function switchCornerImage() {
+            const current = chaosButtonImage.src;
+            let choices = chaosImages.filter(url => url !== current);
+            // URL normalization can make the string differ, so fall back safely.
+            if (!choices.length) choices = chaosImages;
+            chaosButtonImage.src = randomItem(choices);
+        }
+
+        // Keep every bouncing ball strictly inside the visible viewport, even after resize.
+        function clampBallsToViewport() {
+            balls.forEach(ball => {
+                const maxX = Math.max(0, innerWidth - ball.size);
+                const maxY = Math.max(0, innerHeight - ball.size);
+                ball.x = Math.min(Math.max(0, ball.x), maxX);
+                ball.y = Math.min(Math.max(0, ball.y), maxY);
+                ball.el.style.transform = `translate(${ball.x}px, ${ball.y}px)`;
+            });
+        }
+        window.addEventListener('resize', clampBallsToViewport);
+
+        // Every game card ALWAYS opens in a new browser tab.
+        function forceGameLinksToNewTabs() {
+            gameGrid.querySelectorAll('a[href]').forEach(link => {
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+            });
+        }
+        forceGameLinksToNewTabs();
+
+        const randomEvents = [
+            openRandomGame,
+            playRandomSong,
+            spawnBall,
+            flipPage,
+            shuffleGames,
+            createRedMess,
+            toggleChinese,
+            switchCornerImage
+        ];
+
+        chaosButton.addEventListener('click', () => {
+            randomItem(randomEvents)();
         });
 
-        switch (pattern) {
-            case 'solid':
-                body.style.background = color1;
-                break;
-            case 'gradient':
-                body.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
-                break;
-            case 'geometric':
-                body.style.background = `repeating-linear-gradient(45deg, ${color1}, ${color1} 10px, ${color2} 10px, ${color2} 20px)`;
-                break;
-            case 'dots':
-                body.style.background = `
-                    radial-gradient(circle at 25% 25%, ${color2} 2px, transparent 2px),
-                    radial-gradient(circle at 75% 75%, ${color2} 2px, transparent 2px)
-                `;
-                body.style.backgroundColor = color1;
-                body.style.backgroundSize = '40px 40px';
-                break;
-            case 'triangles':
-                body.style.background = `
-                    linear-gradient(45deg, ${color2} 25%, transparent 25%, transparent 75%, ${color2} 75%) 0 0/40px 40px,
-                    linear-gradient(-45deg, ${color2} 25%, transparent 25%, transparent 75%, ${color2} 75%) 0 0/40px 40px
-                `;
-                body.style.backgroundColor = color1;
-                break;
-            case 'confetti':
-                body.style.background = `
-                    radial-gradient(circle at 20% 30%, ${color2} 2px, transparent 2px),
-                    radial-gradient(circle at 80% 70%, ${color2} 2px, transparent 2px),
-                    radial-gradient(circle at 40% 20%, ${color2} 1px, transparent 1px),
-                    radial-gradient(circle at 65% 35%, ${color2} 1px, transparent 1px),
-                    radial-gradient(circle at 35% 65%, ${color2} 1.5px, transparent 1.5px),
-                    radial-gradient(circle at 85% 40%, ${color2} 1.5px, transparent 1.5px)
-                `;
-                body.style.backgroundColor = color1;
-                body.style.backgroundSize = '60px 60px';
-                break;
-            default:
-                body.style.background = color1;
-        }
-        setContrastTextColor(color1);
+    </script>
 
-        if (save) {
-            localStorage.setItem('bgSettings', JSON.stringify({
-                color1,
-                color2,
-                pattern
-            }));
-        }
-    }
-
-    const savedSettings = JSON.parse(localStorage.getItem('bgSettings'));
-    if (savedSettings) {
-        colorPicker1.value = savedSettings.color1 || '#1e293b';
-        colorPicker2.value = savedSettings.color2 || '#1e40af';
-        patternSelect.value = savedSettings.pattern || 'gradient';
-        updateBackground(false);
-    } else {
-        updateBackground(false);
-    }
-
-    colorPickerButton.addEventListener('click', () => {
-        colorPickerDropdown.classList.toggle('hidden');
-    });
-
-    closeColorPicker.addEventListener('click', () => {
-        colorPickerDropdown.classList.add('hidden');
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!colorPickerContainer.contains(e.target)) {
-            colorPickerDropdown.classList.add('hidden');
-        }
-    });
-
-    patternPreviews.forEach(preview => {
-        preview.addEventListener('click', () => {
-            const pattern = preview.getAttribute('data-pattern');
-            patternSelect.value = pattern;
-            updateBackground();
-        });
-    });
-
-    colorPicker1.addEventListener('input', updateBackground);
-    colorPicker2.addEventListener('input', updateBackground);
-    patternSelect.addEventListener('change', updateBackground);
-</script>
 </body>
 </html>
