@@ -1553,10 +1553,20 @@
                 const dy = cursorY - centerY;
                 const distance = Math.hypot(dx, dy);
 
-                if (distance <= haunter.size * 0.42) {
-                    window.close();
-                    return;
-                }
+if (distance <= haunter.size * 0.42) {
+    // Works if this tab was opened by another page/script.
+    window.close();
+
+    // GitHub Pages cannot close a directly opened tab,
+    // so erase the game instead.
+    setTimeout(() => {
+        if (!window.closed) {
+            window.location.replace('about:blank');
+        }
+    }, 100);
+
+    return;
+}
 
                 if (distance > 0) {
                     const step = Math.min(haunter.speed * dt, distance);
