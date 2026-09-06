@@ -127,6 +127,25 @@
             -webkit-user-drag: none;
         }
 
+        #heartDisplay {
+            position: fixed;
+            top: 108px;
+            left: 35px;
+            z-index: 300000;
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            pointer-events: none;
+        }
+
+        #heartDisplay.visible { display: flex; }
+        #heartDisplay img {
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+            filter: drop-shadow(0 3px 4px rgba(0,0,0,.35));
+        }
+
         #pageWorld {
             width: 100%;
             min-height: 100vh;
@@ -173,6 +192,16 @@
                 top: 10px;
                 left: 10px;
             }
+
+            #heartDisplay {
+                top: 82px;
+                left: 21px;
+            }
+
+            #heartDisplay img {
+                width: 42px;
+                height: 42px;
+            }
         }
     </style>
 </head>
@@ -182,6 +211,7 @@
     <button id="chaosButton" type="button" aria-label="Random event">
         <img id="chaosButtonImage" src="https://i.imgur.com/9YjVx84.png" alt="Random event">
     </button>
+    <div id="heartDisplay" aria-label="Lives"></div>
 
     <div id="pageWorld">
 
@@ -1153,6 +1183,7 @@
 
         const chaosButton = document.getElementById('chaosButton');
         const chaosButtonImage = document.getElementById('chaosButtonImage');
+        const heartDisplay = document.getElementById('heartDisplay');
         const pageWorld = document.getElementById('pageWorld');
         const gameGrid = document.getElementById('gameGrid');
 
@@ -1170,7 +1201,9 @@
         ];
 
         let pageRotation = 0;
-        let chineseMode = false;
+        let currentLanguage = 'de';
+        let hearts = 3;
+        let heartsStarted = false;
         let currentAudio = null;
         const balls = [];
         const rogueGames = new Set();
@@ -1427,8 +1460,8 @@
             placeholder.replaceWith(other);
         });
 
-        /* Event 7: toggle all visible menu/game words German <-> Mandarin */
-        const translationMap = new Map([
+        /* Event 7: switch all visible menu/game words to another language. */
+        const chineseTranslationMap = new Map([
             ['Manollos Spiele', '马诺洛的游戏'],
             ['Hintergrund', '背景'],
             ['Hintergrund anpassen', '调整背景'],
@@ -1462,7 +1495,46 @@
             ['Penalty', '点球'],
             ['Air Ltd.', '航空有限公司']
         ]);
-        const reverseTranslationMap = new Map([...translationMap].map(([de, zh]) => [zh, de]));
+        const norwegianTranslationMap = new Map([
+            ['Manollos Spiele', 'Manollos spill'],
+            ['Hintergrund', 'Bakgrunn'],
+            ['Hintergrund anpassen', 'Tilpass bakgrunn'],
+            ['Erste Farbe:', 'Første farge:'],
+            ['Zweite Farbe:', 'Andre farge:'],
+            ['Muster:', 'Mønster:'],
+            ['Einfarbig', 'Ensfarget'],
+            ['Verlauf', 'Gradering'],
+            ['Geometrisch', 'Geometrisk'],
+            ['Punkte', 'Prikker'],
+            ['Dreiecke', 'Trekanter'],
+            ['Konfetti', 'Konfetti'],
+            ['Memory', 'Hukommelse'],
+            ['Cosmos', 'Kosmos'],
+            ['Snake', 'Slange'],
+            ['Forge', 'Smie'],
+            ['Hangman', 'Hangmann'],
+            ['Tint', 'Fargetone'],
+            ['Yield', 'Utbytte'],
+            ['Color Catcher', 'Fargefanger'],
+            ['Echo', 'Ekko'],
+            ['PathPulse', 'Stipuls'],
+            ['Dash', 'Spurt'],
+            ['Tic Tac Toe', 'Bondesjakk'],
+            ['Trax', 'Spor'],
+            ['Schnapsen', 'Schnapsen'],
+            ['Gamble', 'Pengespill'],
+            ['Nexon', 'Nexon'],
+            ['Spike', 'Pigg'],
+            ['Key Rush', 'Tasterush'],
+            ['Penalty', 'Straffespark'],
+            ['Air Ltd.', 'Flyselskap AS']
+        ]);
+
+        const languageMaps = {
+            de: new Map(),
+            zh: chineseTranslationMap,
+            no: norwegianTranslationMap
+        };
 
         function translateTextNodes(root, map) {
             const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -1483,11 +1555,20 @@
             });
         }
 
-        function toggleChinese() {
-            chineseMode = !chineseMode;
-            translateTextNodes(pageWorld, chineseMode ? translationMap : reverseTranslationMap);
-            document.documentElement.lang = chineseMode ? 'zh-CN' : 'de';
-            chaosButton.setAttribute('aria-label', chineseMode ? '随机事件' : 'Zufälliges Ereignis');
+        function switchLanguage() {
+            const choices = ['de', 'zh', 'no'].filter(language => language !== currentLanguage);
+            const nextLanguage = randomItem(choices);
+
+            if (currentLanguage !== 'de') {
+                const backToGerman = new Map([...languageMaps[currentLanguage]].map(([de, translated]) => [translated, de]));
+                translateTextNodes(pageWorld, backToGerman);
+            }
+            if (nextLanguage !== 'de') translateTextNodes(pageWorld, languageMaps[nextLanguage]);
+
+            currentLanguage = nextLanguage;
+            document.documentElement.lang = nextLanguage === 'zh' ? 'zh-CN' : nextLanguage;
+            const labels = { de: 'Zufälliges Ereignis', zh: '随机事件', no: 'Tilfeldig hendelse' };
+            chaosButton.setAttribute('aria-label', labels[nextLanguage]);
         }
 
         /* Event 8: randomize only the image; its fixed corner position stays unchanged */
@@ -1513,6 +1594,10 @@
 
         /* Event 10: add one slow, stackable image that hunts the cursor. */
         function spawnCursorHaunter() {
+            if (!heartsStarted) {
+                heartsStarted = true;
+                updateHeartDisplay();
+            }
             const size = 76;
             const minimumDistance = Math.min(260, Math.max(120, Math.min(innerWidth, innerHeight) * 0.3));
             let x = 0;
@@ -1536,6 +1621,43 @@
             el.style.transform = `translate(${x}px, ${y}px)`;
         }
 
+        function updateHeartDisplay() {
+            heartDisplay.replaceChildren();
+            for (let i = 0; i < hearts; i++) {
+                const heart = document.createElement('img');
+                heart.src = 'https://i.imgur.com/5JgHIt9.png';
+                heart.alt = '';
+                heartDisplay.appendChild(heart);
+            }
+            heartDisplay.classList.toggle('visible', heartsStarted);
+            heartDisplay.setAttribute('aria-label', `${hearts} ${hearts === 1 ? 'life' : 'lives'}`);
+        }
+
+        function closeSite() {
+            window.close();
+            setTimeout(() => {
+                if (!window.closed) window.location.replace('about:blank');
+            }, 100);
+        }
+
+        function loseHeart(haunter) {
+            const index = cursorHaunters.indexOf(haunter);
+            if (index !== -1) cursorHaunters.splice(index, 1);
+            haunter.el.remove();
+            hearts = Math.max(0, hearts - 1);
+            updateHeartDisplay();
+            if (hearts === 0) closeSite();
+        }
+
+        function gainHeart() {
+            if (heartsStarted && hearts < 6) {
+                hearts++;
+                updateHeartDisplay();
+                return;
+            }
+            runRandomEvent(gainHeart);
+        }
+
         document.addEventListener('pointermove', e => {
             cursorX = e.clientX;
             cursorY = e.clientY;
@@ -1546,7 +1668,7 @@
             const dt = Math.min((now - lastHaunterFrame) / 1000, 0.05);
             lastHaunterFrame = now;
 
-            cursorHaunters.forEach(haunter => {
+            [...cursorHaunters].forEach(haunter => {
                 const centerX = haunter.x + haunter.size / 2;
                 const centerY = haunter.y + haunter.size / 2;
                 const dx = cursorX - centerX;
@@ -1554,17 +1676,7 @@
                 const distance = Math.hypot(dx, dy);
 
 if (distance <= haunter.size * 0.42) {
-    // Works if this tab was opened by another page/script.
-    window.close();
-
-    // GitHub Pages cannot close a directly opened tab,
-    // so erase the game instead.
-    setTimeout(() => {
-        if (!window.closed) {
-            window.location.replace('about:blank');
-        }
-    }, 100);
-
+    loseHeart(haunter);
     return;
 }
 
@@ -1615,14 +1727,22 @@ if (distance <= haunter.size * 0.42) {
             flipPage,
             shuffleGames,
             toggleRandomRogueGame,
-            toggleChinese,
+            switchLanguage,
             switchCornerImage,
             randomizeBackground,
-            spawnCursorHaunter
+            spawnCursorHaunter,
+            gainHeart
         ];
 
+        function runRandomEvent(excludedEvent = null) {
+            const choices = excludedEvent
+                ? randomEvents.filter(event => event !== excludedEvent)
+                : randomEvents;
+            randomItem(choices)();
+        }
+
         chaosButton.addEventListener('click', () => {
-            randomItem(randomEvents)();
+            runRandomEvent();
         });
 
     </script>
