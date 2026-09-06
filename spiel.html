@@ -151,6 +151,21 @@
 
         .chaos-ball:active { cursor: grabbing; }
 
+        .cursor-haunter {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 250000;
+            width: 76px;
+            height: 76px;
+            object-fit: contain;
+            pointer-events: none;
+            user-select: none;
+            -webkit-user-drag: none;
+            filter: drop-shadow(0 5px 8px rgba(0,0,0,.45));
+            will-change: transform;
+        }
+
         @media (max-width: 640px) {
             #chaosButton {
                 width: 66px;
@@ -1132,7 +1147,7 @@
 
         /* ============================================================
            RANDOM EVENT SYSTEM
-           Every click chooses one of nine events.
+           Every click chooses one of ten events.
            Effects are cumulative unless the event itself is a toggle.
            ============================================================ */
 
@@ -1159,8 +1174,9 @@
         let currentAudio = null;
         const balls = [];
         const rogueGames = new Set();
-        let chaosFloatLevel = 0;
-        let chaosFloatState = null;
+        const cursorHaunters = [];
+        let cursorX = innerWidth / 2;
+        let cursorY = innerHeight / 2;
 
         function randomItem(array) {
             return array[Math.floor(Math.random() * array.length)];
@@ -1411,48 +1427,6 @@
             placeholder.replaceWith(other);
         });
 
-        /* Floating chaos image: first activation starts it; later activations gently speed it up. */
-        function increaseChaosFloat() {
-            chaosFloatLevel++;
-            const speed = 10 + (chaosFloatLevel - 1) * 2.25; // deliberately very slow
-
-            if (!chaosFloatState) {
-                const rect = chaosButton.getBoundingClientRect();
-                const angle = Math.random() * Math.PI * 2;
-                chaosFloatState = {
-                    x: rect.left, y: rect.top,
-                    vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed,
-                    last: performance.now()
-                };
-                requestAnimationFrame(animateChaosButton);
-            } else {
-                const mag = Math.hypot(chaosFloatState.vx, chaosFloatState.vy) || 1;
-                chaosFloatState.vx = chaosFloatState.vx / mag * speed;
-                chaosFloatState.vy = chaosFloatState.vy / mag * speed;
-            }
-        }
-
-        function animateChaosButton(now) {
-            if (!chaosFloatState) return;
-            const s = chaosFloatState;
-            const dt = Math.min((now - s.last) / 1000, 0.05);
-            s.last = now;
-            s.x += s.vx * dt;
-            s.y += s.vy * dt;
-
-            const maxX = Math.max(0, innerWidth - chaosButton.offsetWidth);
-            const maxY = Math.max(0, innerHeight - chaosButton.offsetHeight);
-            if (s.x <= 0) { s.x = 0; s.vx = Math.abs(s.vx); }
-            else if (s.x >= maxX) { s.x = maxX; s.vx = -Math.abs(s.vx); }
-            if (s.y <= 0) { s.y = 0; s.vy = Math.abs(s.vy); }
-            else if (s.y >= maxY) { s.y = maxY; s.vy = -Math.abs(s.vy); }
-
-            chaosButton.style.left = s.x + 'px';
-            chaosButton.style.top = s.y + 'px';
-            requestAnimationFrame(animateChaosButton);
-        }
-
         /* Event 7: toggle all visible menu/game words German <-> Mandarin */
         const translationMap = new Map([
             ['Manollos Spiele', '马诺洛的游戏'],
@@ -1525,6 +1499,77 @@
             chaosButtonImage.src = randomItem(choices);
         }
 
+        /* Event 9: choose entirely random colors and a random background pattern. */
+        function randomizeBackground() {
+            const randomColor = () => '#' + Math.floor(Math.random() * 0x1000000)
+                .toString(16).padStart(6, '0');
+            const patterns = [...patternSelect.options].map(option => option.value);
+
+            colorPicker1.value = randomColor();
+            colorPicker2.value = randomColor();
+            patternSelect.value = randomItem(patterns);
+            updateBackground();
+        }
+
+        /* Event 10: add one slow, stackable image that hunts the cursor. */
+        function spawnCursorHaunter() {
+            const size = 76;
+            const minimumDistance = Math.min(260, Math.max(120, Math.min(innerWidth, innerHeight) * 0.3));
+            let x = 0;
+            let y = 0;
+
+            // Try several random positions so it does not appear directly beside the cursor.
+            for (let attempt = 0; attempt < 30; attempt++) {
+                x = Math.random() * Math.max(1, innerWidth - size);
+                y = Math.random() * Math.max(1, innerHeight - size);
+                if (Math.hypot(x + size / 2 - cursorX, y + size / 2 - cursorY) >= minimumDistance) break;
+            }
+
+            const el = document.createElement('img');
+            el.className = 'cursor-haunter';
+            el.src = 'https://i.imgur.com/myfT3Zm.png';
+            el.alt = '';
+            document.body.appendChild(el);
+
+            const haunter = { el, x, y, size, speed: 27 };
+            cursorHaunters.push(haunter);
+            el.style.transform = `translate(${x}px, ${y}px)`;
+        }
+
+        document.addEventListener('pointermove', e => {
+            cursorX = e.clientX;
+            cursorY = e.clientY;
+        });
+
+        let lastHaunterFrame = performance.now();
+        function animateCursorHaunters(now) {
+            const dt = Math.min((now - lastHaunterFrame) / 1000, 0.05);
+            lastHaunterFrame = now;
+
+            cursorHaunters.forEach(haunter => {
+                const centerX = haunter.x + haunter.size / 2;
+                const centerY = haunter.y + haunter.size / 2;
+                const dx = cursorX - centerX;
+                const dy = cursorY - centerY;
+                const distance = Math.hypot(dx, dy);
+
+                if (distance <= haunter.size * 0.42) {
+                    window.close();
+                    return;
+                }
+
+                if (distance > 0) {
+                    const step = Math.min(haunter.speed * dt, distance);
+                    haunter.x += dx / distance * step;
+                    haunter.y += dy / distance * step;
+                    haunter.el.style.transform = `translate(${haunter.x}px, ${haunter.y}px)`;
+                }
+            });
+
+            requestAnimationFrame(animateCursorHaunters);
+        }
+        requestAnimationFrame(animateCursorHaunters);
+
         // Keep every bouncing ball strictly inside the visible viewport, even after resize.
         function clampBallsToViewport() {
             balls.forEach(ball => {
@@ -1537,10 +1582,11 @@
         }
         window.addEventListener('resize', () => {
             clampBallsToViewport();
-            if (chaosFloatState) {
-                chaosFloatState.x = Math.min(Math.max(0, chaosFloatState.x), Math.max(0, innerWidth - chaosButton.offsetWidth));
-                chaosFloatState.y = Math.min(Math.max(0, chaosFloatState.y), Math.max(0, innerHeight - chaosButton.offsetHeight));
-            }
+            cursorHaunters.forEach(haunter => {
+                haunter.x = Math.min(Math.max(0, haunter.x), Math.max(0, innerWidth - haunter.size));
+                haunter.y = Math.min(Math.max(0, haunter.y), Math.max(0, innerHeight - haunter.size));
+                haunter.el.style.transform = `translate(${haunter.x}px, ${haunter.y}px)`;
+            });
         });
 
         // Every game card ALWAYS opens in a new browser tab.
@@ -1559,9 +1605,10 @@
             flipPage,
             shuffleGames,
             toggleRandomRogueGame,
-            increaseChaosFloat,
             toggleChinese,
-            switchCornerImage
+            switchCornerImage,
+            randomizeBackground,
+            spawnCursorHaunter
         ];
 
         chaosButton.addEventListener('click', () => {
